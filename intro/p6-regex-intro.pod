@@ -1,0 +1,868 @@
+=head1 Introduction to Perl 6 Regex
+
+=head2 Context
+
+Over the years programming languages have incorporated features for
+regular expressions. Some, such as Javascript, have added syntax
+specifically to support regular expressions. Others, such as PHP, have
+just reused their native string type and utilize special subroutines to
+parse strings as regular expressions. But one thing almost all of them
+have in common is that they have mimicked the extended regular
+expression syntax of Perl.
+
+Of course, Perl wasn't the first programming language to have support
+for regular expressions. But it did make them popular. Perl has been so
+successful as a text processing and glue language and regular
+expressions so well interwoven into the language that anyone who uses
+Perl almost I<has> to learn regular expressions. Also, by applying some
+of Perl's philosophy to regular expressions, common usages became easy
+and complex usages became possible. Here are just a few features that
+resulted: character class shortcuts, annotated regular expressions,
+ability to match unicode properties, zero-width assertions, independant
+subexpressions, and code execution inside of a regular expression.
+
+Unfortunately, as the regular expressioning public put more demand on
+Perl's regular expression syntax, it accumulated some crufty items--
+little inconsistencies that were to maintain backward compatibility or
+were introduced because they were needed, but before they were fully
+thought out. In designing Perl 6, Larry Wall not only looked at the
+syntax and semantics of Perl proper, but he also took a hard look at the
+sub-language that is regular expressions and refactored it into
+something that makes better sense.
+
+In this article I'm going to give an introduction to Perl 6 regex (we
+call them "regex" to maintain the historical association with regular
+expressions though they've strayed quite far from the mathematical
+sense of regular languages). I'll point out differences from
+Perl 5 syntax but no knowledge of Perl 5's regular expression syntax
+should be necessary to understand this document.  If you're a Perl 5
+geek, you may be bored for a while, but read anyway so that you can
+pick up the syntactic and semantic differences.
+
+=head2 Literals
+
+Firstly, let's get some small syntactic things out of the way. In Perl
+6, as in other implementations, regex are typically delimited by slashes
+(aka, leaning toothpicks), so a typical regex to match the string "abc"
+would look like this:
+
+    /abc/
+
+A regex is also sometimes called a "pattern" because we're looking for
+a portion of a string that looks like the strings that the regex
+describes. Regex are also sometimes called "rules" because they
+describe the conditions under which the string may match. But what
+string are we looking in? As in Perl 5, Perl 6 applies the regex to a
+variable called C<$_> if we haven't explicitly specified a variable to
+match against. For now I'm going to continue assuming that our string
+is in C<$_> in my examples. Later I'll show you how to specify a
+different string to match against.
+
+So, the above regex tries to find the pattern "abc" in the string C<$_>.
+If the pattern appears in the string, the regex returns a true value to
+indicate that it matched successfully, otherwise it returns a false
+value. It's important to note that the pattern may appear anywhere in
+the string. So, for instance, if C<$_> contained "fooabcbar", the
+above pattern will sucessfully match and the regex will return a true
+value. Here are some more strings that would successfully match against
+the regex:
+
+    abcgoobltygook
+    now I know my abcs
+    abc
+    babcock
+
+=head2 Meta-syntax
+
+Now, if all you can do is match literal strings, regexes wouldn't be so
+useful would they? Some characters rather than taken literally are so-
+called metacharacters that have special meaning in a regex. In Perl 6,
+any non-alphanumeric character is considered a metacharacter by
+default. That is, alphabetic and numeric characters match themselves and
+any other character may not match itself because it may have special
+meaning. (For the purposes of metasyntax, the underscore is considered
+alphanumeric.)
+
+Currently not all metacharacters actually I<have> a special meaning but
+many do and in order to keep things simple, Perl 6 chooses to designate
+all non-alphanumeric characters as metasyntactic. However, there's an
+"escape mechanism" that lets you treat metacharacters as themselves
+(literally), and alphanumeric characters as metasyntactic. By prefixing
+an alphanumeric character with a backslash (B<\>) it becomes a
+metacharacter and is special. By the same token, prefixing a non-
+alphanumeric character with a backslash removes its metasyntactic nature
+and it becomes literal.
+
+So, for example, a common metasyntactic character found in regular
+expressions is a period (C<.>, sometimes just called a "dot") and it
+matches B<any> character. Thus,
+
+    /f..d/
+
+will match any four character sequence that starts with an "f" and ends
+with a "d". All of the following strings match this pattern:
+
+    my name is fred                     # matched "fred"
+    I need food, now!                   # matched "food"
+    those guys are turf idols           # matched "f id"
+    shift down a gear                   # matched "ft d"
+    
+If you want to actually match a period you can escape it like so:
+
+    /foo\./                             # matches "foo."
+
+Similarly, the letter "t" in a regular expression matches itself (i.e.,
+an occurence of the letter "t"). But, with a backslash immediately
+preceding the "t", it takes on its metasyntactic meaning of a tab
+character.  For example:
+
+    /tall/          # matches the string "tall"
+    /\tall/         # matches a tab character, followed by "all"
+
+Another way to match character sequences that are to be taken
+literally is to enclose them in quotes:
+
+    /'foo.'/                            # matches "foo."
+    /"foo."/                            # same
+
+In these cases, the quotes are metasyntactic delimiters that mean
+"match the characters in between literally".
+
+=begin sidebar
+
+In Perl 5 (and most other regular expression variants), a dot matches
+any character except for the newline sequence. In Perl 6, this odd
+restriction is lifted and the dot matches B<any> character, including
+the newline sequence. Perl 6 has other mechanisms to accomplish Perl
+5's behavior.  See L<"Character Classes"> below.
+
+=end sidebar
+
+The most important metasyntactic characters in regex are whitespace
+(typically space characters, but sometimes tabs and other "invisible"
+characters). Because regular expressions tend towards high character
+density, they can often be difficult to read. In Perl 6 regex, you may
+use whitespace to separate parts of your regex to make it easier to
+read. The whitespace is ignored by the regex engine. To match literal
+space characters, just as with other metasyntax, you may precede the
+space with a backslash or enclose the space in quotes.
+
+In future examples I will occasionally show a given regex in its spaced
+form. The spaced form is preferable when writing regex as it makes them
+easier to read later. The spaced form will be highlighted with the text
+"SPACED" so that you can see the difference in readability.
+
+=head2 Quantifiers
+
+Three other important metacharacters are what are called quantifiers.
+These characters allow you to specify repetition; that a character or
+group of characters may be matched multiple times.
+
+    quantifier      matches
+        *           the preceding thing zero or more times
+        +           the preceding thing one or more times
+        ?           the preceding thing zero or one time
+
+
+Examples:
+
+    /fo*/           # will match "f", "fo", "foo", "fooo", etc.
+    /fo+/           # will match "fo", "foo", "fooo", "foooo", etc.
+    /fo?/           # will only match "f" or "fo" 
+
+Note that in the above examples the quantifier is only applied to the
+preceding character. If you need to match a group of characters
+repeatedly, you have to use one of the several grouping mechanisms in
+Perl 6 regex (see L<Grouping> below).
+
+There is another character sequence sometimes called the universal
+quantifier that allows you to prescribe a specific number of times a
+particular pattern may match. To use the universal quantifier, you use
+two C<*> characters followed by a number or a range like so:
+
+    /fo**3/         # matches only "fooo"
+    /fo**3..5/      # matches one of "fooo", "foooo", or "fooooo"
+    / fo ** 3..5 /  # same as above SPACED for readability
+
+You may also specify a closure after the C<**>, but that is beyond the
+scope of this introduction to explain.  See the references given at
+the end of this article for more reading.
+
+=begin sidebar
+
+=head3 A note on greed
+
+As in Perl 5, the quantifiers are greedy.  That is, they try to
+consume as much of the target string as possible.  So the pattern
+
+    /.*abc/
+
+when applied to the string "abcdefghujklmnopqrstuvwyxz" will first try
+to match the entire string (because C<.> matches any character and C<*>
+tries to match as much as it can). When the regex engine gets to the end
+of the string and can not match "abc" it will back up one character and
+try to match "abc" again. This process will repeat until the regex
+engine either matches or runs out of characters to process.
+
+Also as in Perl 5, the greediness of quantifiers can be "turned off" by
+adding a question mark (C<?>) immediately after the quantifier.
+So for instance,
+
+    /.*?abc/        # first tries to match nothing, then "abc"
+    /.+?abc/        # first tries matching one character, then "abc"
+    /.**?3..5abc/   # first tries matching three characters, then "abc"
+    / . **? 3..5 abc /      # same as above SPACED
+
+The default behavior (greediness) can be thought of as the regex engine
+first matching the most characters that the quantifier will allow and
+then backing up one character at a time if the rest of the pattern
+doesn't match (to try again). With greediness turned off, the regex
+engine matches as little as the quantifier allows and moves forward one
+character at a time to match the rest of the pattern.
+
+Note that a regex is processed from left to right and the greediness (or
+non-greediness) behavior B<only> applies to the part of the regex
+governed by a particular quantifier.  Making quantifiers match
+minimally does not cause the pattern as a whole to match minimally.
+
+=end sidebar
+
+=head2 Character Classes
+
+We've seen how to match a specific character at a given location by
+putting that character in the regex and we've seen how to match any
+character at a specific location by putting a dot in the regex, but
+sometimes you want to match a specific I<set> of characters at a given
+position. The mechism to do this in regex is called a "character class".
+Character classes are designated by C<< <[]> >> with the specific
+characters listed inside the brackets. For instance,
+
+    /foo<[dlt]>/        # matches "food", "fool" or "foot"
+
+The sequence C<< <[dlt]> >> represents any one of the characters "d", "l",
+or "t". You can also specify a set of contiguous characters to match
+using a range like so:
+
+    /<[a..d]>/          # matches one of "a", "b", "c", or "d"
+
+You can also mix ranges and specific characters:
+
+    /<[a..dxyz]>/       # matches one of "a","b","c","d","x","y", or "z"
+    /<[xyza..d]>/       # same
+    /<[x..za..d]>/      # same
+    /<[ x..z a..d ]>/   # same SPACED
+
+Some character classes are so useful that they have their own
+designated short-cuts.  All of the character class short-cuts make use
+of alphabetic characters that have been given a metasyntactic meaning
+by prefixing the character with a back slash.  Here's a table of the
+short-cuts:
+
+    short-cut       matches
+    \w              word characters (alphabetics, numerics, and underscore)
+    \W              non-word characters
+    \d              digits
+    \D              non-digits
+    \s              whitespace characters
+    \S              non-whitespace characters
+    \t              tab character
+    \T              anything but a tab character
+    \n              newline sequence
+    \N              anything I<but> a newline sequence
+    \r              carriage return character
+    \R              anything but carriage return character
+    \f              form feed character
+    \F              anything but form feed character
+    \h              horizontal whitespace
+    \H              anything but horizontal whitespace
+    \v              vertical whitespace
+    \V              anything but vertical whitespace
+
+You may notice some regularity in this table. For every character class
+short-cut of the form C<< \<lower case letter> >> the anti-class is
+always C<< \<corresponding upper case letter> >>. (The old non-newline
+meaning of C<.> maps neatly to the new C<\N> sequence.)
+
+Character classes bear a remarkable resemblance to sets.  In fact, you can "add"
+and "subtract" character classes much like you would sets:
+
+    /<[a..z]-[aeiou]>/      # Only match a consonant
+    /<[asdfg]+[hjkl;]>+/    # Only match a sequence of characters that can
+                            # be made from home row keys.
+
+
+=head2 Grouping
+
+There are several ways to group a portion of a regex. We saw one such
+way earlier in our discussion of literals: surround the characters with
+quotes. Quoting does two things, it forces all of the characters between
+the quotes to be treated literally and it groups the string of
+characters together into a quantifiable unit.
+
+    /'foo.'*/       # will match "foo.", "foo.foo.", "foo.foo.foo.", etc.
+
+Another way to create a quantifiable unit is to use square brackets
+(C<[]>).  Square brackets delimit a portion of the regex that may be
+treated as a whole.  The text in between the brackets is just another
+regex.
+
+    /f[oo]*/        # will match "f", "foo", "foooo", "foooooo", etc.
+    /a[bc*d]?/      # will match "a", "abd", "abcd", "abccd", "abcccd", etc.
+    / a [ bc* d ]? /        # same as above SPACED
+
+Yet another way to group a portion of a regex to be treated as a unit is
+to use round brackets (C<()>). These are identical to square brackets
+as far as grouping goes, but additionally, the portion of the string
+that is matched by the regex inside the round brackets is also saved
+somewhere and may be accessed later in a variety of ways. Round brackets
+are said to be "capturing brackets" because of this property. The
+following table shows some examples of what would be captured if the
+given regex matched certain portions of a string:
+
+    regex       matched         captured
+
+    /f(oo)*/    "f"             ""              # the empty string
+                "foo"           "oo"
+                "foooo"         "oooo"
+
+    /a(bc*d)?/  "a"             ""              # the empty string
+                "abd"           "bd"
+                "abcd"          "bcd"
+                "abccd"         "bccd"
+
+Both round and square brackets delimit a portion of the regex. This
+portion of the regex is called a "subpattern". The portion of the string
+that matches a subpattern can be referenced and accessed individually.
+We'll talk more about capturing and where the captured portion of the
+string is stored later.
+
+=head2 Alternation and Conjunction
+
+There are a couple of other useful concepts in regex called
+"alternation" and "conjunction".  Alternation is the idea that at a
+given location in a string, there are alternatives to what may be
+matched.  Conjunction is the idea that at a given location in a
+string, there are multiple portions of a regex that must match exactly
+the same section of the string.
+
+Alternation is designated in regex by either a single vertical bar
+(C<|>) or a double vertical bar (C<||>).  While each allows you to
+specify alternatives, how they process those alternatives is different.
+
+A single vertical bar does "longest token" matching on the
+alternations with no inherent order as to which alternative is tried
+first.  So, for instance, if we were matching the string
+"football", the following regex
+
+    / f | fo | foo /                        # SPACED
+
+would match "foo" since that's the longest matching portion of the
+regex in the alternation.  But the regular expression engine may have
+tried them all before it discovered "foo", or perhaps "foo" was the
+first and only alternative tried. It is completely up to the
+regex engine implementation as to how the alternatives are tried.
+
+Had the regex been
+
+    / f | fo | fo.*l | foo /                # SPACED
+
+then the third item in the alternation would be matched since
+C<fo.*l> will match the entire string. Again, which order the
+alternatives are tried is unspecified.
+
+A double vertical bar (C<||>) will match each alternative in a left-to-
+right manner. That is, the regex
+
+    /  f || fo || foo /                     # SPACED
+
+will first try to match "f", and then (if it failed to match "f") try
+to match "fo", and finally it will try to match "foo". So, were the
+above regex applied to the string "football" as before, the first
+alternative ("f") would match. This behavior is exactly the same as
+traditional implementations of alternation in other backtracking
+regular expression engines.
+
+Which alternative matches and the order in which the alternatives are
+tried becomes particularly important when each alternative has side
+effects (such as setting a variable or calling a subroutine). We'll
+talk more about that later.
+
+Similar to alternations, conjunctions in regex are designated by either
+a single ampersand (C<&>) or a double ampersand (C<&&>). In both forms,
+all of the conjuncted terms must match the exact same portion of the
+string they are being matched against. But, as with alternation, the single-
+ampersand version matches the subpatterns in some unspecified order while the
+double ampersand version of conjunctions will try each conjuncted
+portion of the regex in a left-to-right manner.
+
+For an example, if the following regex were applied to the string
+"blah",
+
+    / <[a..z]>+ & [ ... ] /     # matches "bla"
+
+it would match the string "bla" because the subpattern on the right of the
+ampersand matches exactly 3 characters and the subpattern on the left
+matches any sequence of lower case letters. By comparison, had the regex
+been (still applied to the string "blah"):
+
+    / <[a..z]>+ && [ ... ] /                    # SPACED
+
+It B<still> would match "bla" but how it arrives at that match is
+slightly different.  First, the left hand side of the C<&&> would match
+as much as it possibly can (since C<*> is greedy), then the right hand
+side would match its 3 characters.  Since the two sides then do not
+match the exact same portion of the string, the regex engine is said
+to "backtrack" and try the left hand side with one fewer character
+before trying to match the right hand side again.  This continues
+until both sides match the exact same portion of the string or until
+it can be determined that no such match is possible.
+
+=head2 Backtracking
+
+Backtracking has the potential to happen whenever there is a decision
+point in a regex. An alternation creates a decision point with several
+alternatives; a quantifier creates a decision point where a given
+portion of a regex may match one more or one fewer times. Backtracking
+is caused by the regex engine's attempt to satisfy an overall match. For
+instance, when matching the following regex against the string "footbag"
+
+    / [ foot || base || hand ] ball /           # SPACED
+
+the regex engine will match "foot" and then attempt to match "ball" when
+it realizes that "ball" will not match, it backtracks to the point where
+it matched "foot" and tries to match the next alternative at that point
+(in this case, "base"). When that fails to match, the regex engine will
+try to match the next alternative, and so forth until either one of the
+alternatives matches or they are all exhausted.
+
+Now, as a human walking through the same sequence of steps that the
+regex goes through, I can tell right away that since C<foot> was
+matched, that neither C<base> nor C<hand> will match. But the regex
+engine may not know this. (For this simple example, the regex engine can
+probably figure out that the alternatives are mutually exclusive. If
+that bothers you, imagine that they are instead complicated expressions
+rather than simple strings) As the match for "ball" repeatedly fails,
+the regex engine repeatedly backtracks and tries again.
+
+However, Perl 6 provides a way to tell the regex engine when to give
+up. A colon in the regex causes Perl to not retry the preceding
+"atom".  In regex parlance, an atom is anything that is matched as a
+unit; a group is an atom, a single character may be an atom, etc.
+So, in the above example, if I wanted to tell the regex engine to not
+try the other alternatives once one of them matched (because I, as the
+person writing the regex, know that they are all mutually exclusive),
+I simply follow the group with a colon like so:
+
+    / [ foot || base || hand ] : ball /         # SPACED
+
+As soon as one of the alternatives match, the regex engine will move
+past the colon and try to match C<ball>. When it fails to match C<ball>,
+ordinarily it would backtrack to try other possibilities. But now the
+colon acts as a stopping point that says, "don't bother backtracking
+because nothing else will match" and so the regex engine will fail that
+portion of the regex immediately rather than trying all of the other
+alternatives. It's important to note that the colon does not necessarily
+cause the entire regex to fail once it is backtracked over, but only the
+atom to which it is applied. If not matching that atom means that the
+entire regex won't match, then, of course, the entire regex will fail.
+
+Perl 6 has other forms of backtracking control. A double colon will
+cause its enclosing group to fail if backtracked over. A triple colon
+will cause the entire regex to fail.   For more information on these
+see L<S05:Backtracking control>.
+
+=head2 Zero-Width Assertions
+
+As the regular expression engine processes a string to see if it matches
+a given pattern, it keeps a marker to denote how much of the string it
+has processed so far. (When this marker moves backwards, the regex
+engine is backtracking) As the marker moves along the string, it is said
+to "consume" the string. Sometimes you want to match without consuming
+any of the input string or match between characters (say the transition
+from an alphabetic character to a numeric character or only at the
+beginning of the string). This idea of matching without consuming is
+called a zero-width assertion.
+
+Perl 6 provides some metacharacters that denote handy zero-width
+assertions.  
+
+    ^       only matches at the beginning of the string
+    $       only matches at the end of the string
+    ^^      matches at the beginning of any line within the string
+    $$      matches at the end of any line within the string
+    <<      A word boundary, but only matches the transition from
+            non-word character to word character (i.e., the left-hand
+            side of a word)
+    >>      A word boundary, but only matches the transition from
+            word character to non-word character (i.e., the right-hand
+            side of a word)
+
+Here are some example patterns and the portion(s) of the string that
+would match if each pattern were applied repeatedly to the entire string
+"the quick\nbrown fox\njumped over\nthe lazy\ndog" ("\n" denotes a new
+line sequence within the string (i.e. "\n" terminates each line))
+
+    Pattern             Matches
+
+    / ^the \s+ \w+ /    "the quick"
+    / \w+ $ /           "dog"
+    / ^^\w+ /           "the", "brown", "jumped", "the", and "dog"
+    / \w+ $$ /          "quick", "fox", "over", "lazy", and "dog"
+    / << o\w+ /         "over"
+    / o \w+ >> /        "own", "over", "og"
+
+In order for the patterns that would match multiple portions of the string 
+to actually match those substrings, there needs to be some way to tell the regex
+engine to continue matching from where the last match left off. See L<modifiers>
+below)
+
+=head2 Interacting with Perl 6
+
+=head3 match objects and capturing
+
+When a regex successfully matches a portion of a string it returns a
+Match object. In a boolean context the Match object evaluates to true.
+When using capturing brackets (parentheses), the part of the string that
+is captured is placed in the Match object and can be accessed in a
+number of ways.
+
+The Match object itself is called C<$/>.  The substring captured by the
+first set of parentheses is placed in C<$/[0]>, the substring captured
+by the second set of parentheses is placed in C<$/[1]> and so forth.
+There is a short-hand way to access these elements of the Match object
+that will be familiar (yet slightly different) to people who have used
+regular expression engines similar to Perl 5.  The short-hand for
+$/[0],$/[1],$/[2], etc. are the special variables $0, $1, $2, etc.
+The big difference from other regular expression engines is that the
+numbering starts with 0 rather than 1.  Starting from 0 was chosen to
+mimic the array indices of the match object.
+
+=head3 matching Perl variables
+
+Unlike Perl 5, a variable placed inside a regex does not automatically
+interpolate the value of the variable. What happens with the variable
+depends on context (this B<is> perl after all :-). An "unadorned"
+variable will interpolate as a literal string to match if it's a scalar,
+or as an alternation of literal strings to match if it's an array or
+hash (not strictly true, but true enough for now). So, given the
+following declarations:
+
+    my $foo = "ab*c";
+    my @bar = < one two three >;
+
+The regex:
+
+    / $foo @bar /
+
+matches exactly as if you had written
+
+    / 'ab*c' [ one | two | three ] /
+
+Sometimes a variable inside of a regex is actually used to affect a
+named capture of a specific portion of the string instead of (or even
+in addition to) storing the captured portion in $0, $1, $2, etc.
+For instance:
+
+    / $<foo>:=[ <[A-Z]+[0-9]>**4 ] / 
+
+if the group matches, the result is placed in C<< $/<$foo> >>.  As with
+numeric captures, there is a short-hand syntax for accessing a named
+portion of a Match object:  C<< $<foo> >>
+
+=head3 matching other variables.
+
+Until now we've talked primarily about the pattern matching syntax
+itself, but how do we apply these rules to a string other than C<$_>?
+We use the smart match operator C<~~>.  This operator is called "smart
+match" because it does quite a bit more than just apply regular
+expressions to strings, but for now we're just going to focus on that
+one aspect of the smart match operator.  So to match a regular
+expression against the string contained in a variable called C<$foo>,
+we'd do this:
+
+        $foo ~~ / <regex here> /;
+
+There's a more general syntax that allows the author to choose
+different delimiters if your regular expression happens to match the
+C</> character and you don't feel like writing C<\/> so much:
+
+        $foo ~~ m/ <regex here> /;
+        $foo ~~ m! <regex here> !;      # different delimiter
+
+=head3 modifiers
+
+The more general syntax also gives us a convienent place to put
+modifiers that will affect the regular expression as a whole.  For
+instance, there is an C<ignorecase> modifier that causes the RE engine
+to be agnostic towards case distinctions in alphabetic characters.
+There's also a short-hand for this modifier for those times when
+C<ignorecase> is too much to type out.
+
+        $foo ~~ m:ignorecase/ foo /;    # will match "foo", "FOO", "fOo", etc.
+        $foo ~~ m:i/ foo /;             # same
+
+Perl 6 predefines several of these modifiers (for a complete list,
+see L<S05>):
+
+    modifier        short-hand      meaning
+    :ignorecase     :i              Ignore case distinctions
+    :basechar       :b              Ignore accents and other marks
+    :sigspace       :s              whitespace in pattern matches
+                                    whitespace in string
+    :global         :g              matches as many times as possible
+    :continue       :c              Continue matching from where
+                                    previous match left off
+    :pos            :p              Just like :c but pattern is
+                                    anchored where the previous match left off
+    :ratchet                        Don't do any backtracking
+    :bytes                          dot matches bytes
+    :codes                          dot matches codepoints
+    :graphs                         dot matches language-independent graphemes
+    :chars                          dot matches "characters" at current 
+                                    Unicode level
+    :Perl5          :P5             use perl 5 regex syntax
+
+There are two other modifiers for matching a pattern some number of
+times or only matching, say, the third time we see a pattern in a
+string. These modifiers are a little strange in that their short-hand
+forms consist of a number followed by some text:
+
+    modifier        short-hand              meaning
+    :x()            :1x,:4x,:12x            match some number of times
+    :nth()          :1st,:2nd,:3rd,:4th     match only the Nth occurance
+
+Here are some examples to illustrate these modifiers:
+
+    $_ = "foo bar baz blat";
+    m:3x/a/                 # matches the "a" characters in each word
+    m:nth(3)/\w+/           # matches "baz"
+
+Some of these modifiers may also be placed inside the regular expression and
+their effect is scoped until the end of the innermost enclosing
+bracketing construct or the end of the pattern.
+
+    / a [ :i foo ] z/  # matches "afooz", "aFOOz", "aFooz", "afOoz", etc.
+
+The :sigspace modifier is quite useful. If you're unsure of the amount
+of whitespace between tokens or can't guarantee a certain number of
+spaces, you may be inclined to use C<\s*> or C<\s+> often in your regex.
+However, it can get tedious typing C<\s+> so often and it tends to
+visually detract from the parts you're really interested in matching.
+Thus Perl 6 regex provides the :sigspace modifier so that whitespace
+in your pattern matches whitespace in your string.  This is I<so>
+useful that Perl provides a nice short-cut for it.
+
+    /\s*One\s+small\s+step\s*/      # yuck
+    m:sigspace/One small step/      # much better
+    mm/One small step/              # even better!
+
+=head2 Named Assertions
+
+Earlier we talked about "zero-width assertions" that allow us to match
+"in between" characters. But we've also talked about other kinds of
+assertions, only we didn't call them that. Whever you write a regex to
+match I<anything>, you're asserting something about what a successful
+match should look like. So, for instance, in the following regex,
+
+    / \w+ '(' [ \w+ ',' ]* [ \w+ ]? ')' /
+
+we are asserting that, for a string to match, it must contain a sequence
+of word characters followed by a C<(> followed by zero or more word
+character sequences optionally terminated with a comma and finally, a
+C<)>. Each of the "tokens" is an assertion about what must match for the
+entire regex to match. So, C<\w> is an assertion that a word character
+must match, C<'('> is an assertion that an open parenthesis must match,
+and so forth. (There are 6 assertions in the above regex)
+
+However, the regex would make more sense if we could give the
+individual pieces meaningful names.  For instance, if we could
+write the above regex like so:
+
+    / <function_name> '(' [ <parameter> ',' ]* <parameter>? ')' /
+
+you might have a better idea what those C<\w+> sequences were for.
+Lucky for us, Perl 6 provides just such a mechanism.
+
+The syntax for declaring a named regex is:
+
+    regex identifier { \w+ }
+
+Once declared, we can use this in another regex like so:
+
+    / <identifier> /
+
+and it is identical to
+
+    / \w+ /
+
+with an important and useful exception: the portion of the string that
+matches can also be accessed as C< $/<identifier> >.
+
+Perl 6 predeclares several useful named regex (See L<S05> for a complete list):
+
+    <alpha>     a single alphabetic character
+    <digit>     a single numeric character
+    <ident>     an "identifier"
+    <sp>        a single space character
+    <ws>        an arbitrary amount of whitespace
+    <dot>       a period (same as '.')
+    <lt>        a less-than character (same as '<')
+    <gt>        a greater-than character (same as '>')
+    <null>      matches nothing (useful in alternations that may be empty)
+
+You may have noticed that a C<regex> declaration looks very similar to a
+subroutine declaration. Indeed, regex are very much like subroutines.
+They may even have parameters. There are two named regex that are used
+to obtain zero-width look-ahead and look-behind. The parameter passed to
+these named regex may be another regex:
+
+    <before ...>        Zero-width look ahead for ...
+    <after ...>         Zero-width look behind for ...
+
+An example:
+
+    / foo <before \d+> /        # only matches on "foo" followed
+                                # immediately by some digits
+
+Since these assertions are zero-width, the "pointer" that keeps track
+of how much of the string has been consumed will point just after the
+"foo" portion of the string on successful match so that the digits
+can be processed by other means if necessary.
+
+By declaring named regex like this you can build up a whole library of
+regex that match some special purpose language. In fact, Perl 6 lets
+you group your regex under a common name by declaring that all of your
+regex belong to the same "grammar".
+
+    grammar Calc;
+
+    regex expr {
+        <term> '*' <expr> |
+        <term> '/' <expr> |
+        <term>
+    }
+
+    regex term {
+        <factor> '+' <term> |
+        <factor> '-' <term> |
+        <factor>
+    }
+
+    regex factor { <digit>+ |  '(' <expr> ')' }
+
+The grammar declaration must appear at the beginning of the file and is
+in effect until the end of file. To explicitly declare the scope of the
+grammar, enclose the regex in curly braces like so:
+
+    grammar Calc {
+        regex expr { ... }
+        regex term { ... }
+        regex factor { ... }
+    }
+
+To match strings that belong to this grammar, the named regex must be
+fully qualified:
+
+    "3+5*2" ~~ / <Calc.expr> /;
+
+Perl 6 also has some shortcuts for specifying common and useful defaults
+to the regex engine. If, instead of using the C<regex> keyword, you use
+C<token>, Perl 6 will automatically turn on the C<:ratchet> modifier for
+the duration of the regex. The idea being that once you've matched a
+"token" you're not likely to want to backtrack into it.
+
+Also, if you use C<rule> instead of C<regex>, Perl 6 will turn on both
+of the C<:ratchet> and C<:sigspace> modifiers.
+
+Here's the C<Calc> grammar above, rewritten to use these syntactic
+shortcuts:
+
+    grammar Calc;
+
+    rule expr {
+        <term> '*' <expr> |
+        <term> '/' <expr> |
+        <term>
+    }
+
+    rule term {
+        <factor> '+' <term> |
+        <factor> '-' <term> |
+        <factor>
+    }
+
+    token factor { <digit>+ |  '(' <expr> ')' }
+
+There's not much difference is there? But it makes a big difference in
+what gets parsed. The original grammar did not have any provisions for
+matching whitespace, so any whitespace in the string would cause the
+pattern to fail. A string like "3 + 5 * 7" would not be matched by the
+original grammar. Now, because whitespace in the pattern is parsed as
+whitespace in the string, that string will parse successfully.
+
+=head2 Strings and Beyond
+
+Throughout this article I've been talking about regex as they apply to very
+ASCII-like strings, however Perl 6 regex are not restricted by ASCII.  Perl 6
+regex can be applied to any string of Unicode characters and, in fact, are
+written in Unicode by default.
+
+Moreover, Perl 6 regex can be applied to things that are not strings but can be
+made to look like strings.  For instance, they can be applied to a filehandle
+(which can represent itself as a stream of bytes/characters/whatever).  Even
+stranger, is that regex can be applied to an array of objects.  See
+L<S05:Matching against non-strings>.
+
+=head2 Conclusion
+
+Well, that's about it for this introduction to Perl 6 regex. I've run
+out of steam. There are tons of features that I've left out since this
+is just an introduction. A few that come to mind are:
+
+=over 4
+
+=item * match object polymorphism
+
+Captured portions of the regex can be accessed as strings, but they
+can also be accessed in other ways: as a match object, as an array (if
+the subpattern is quantified), as a hash, etc.
+
+=item * Perl code in regex
+
+Curly braces in a regex allow for execution of arbitrary perl code as
+the regex is matched.
+
+=item * quantifier enhancement
+
+The universal quantifier can be used to match more than just some number
+of times. If the thing on the RHS of the C<**> is a regex, then that is
+taken as the pattern to match as the separator between items that match
+the LHS. (e.g., <ident>**',' will match a series of identifiers
+separated by comma characters)
+
+=back 
+
+Be sure to read the references given below for a more detailed
+explanation of the features mentioned in this article.
+
+=head2 References
+
+If you want to read more about Perl 6 regex, see the definitive
+reference at L<http://dev.perl.org/perl6/doc/design/syn/S05.html>.
+There are also some historical documents at
+L<http://dev.perl.org/perl6/doc/design/apo/A05.html> and 
+L<http://dev.perl.org/perl6/doc/design/exe/E05.html> that may give
+you a feel for things. If you're really interested in learning more
+but feel you need to interact with people try the mailing list at
+perl6-language@perl.org or log on to a freenode IRC server and drop by
+#perl6.
+
+=head2 About the Author
+
+Jonathan Scott Duff works as an Applications Architect at an Austin-based
+software development company. He has a beautiful wife and 4 lovely
+children. When not working or spending time with his family, Scott tries
+to keep up with Parrot and Perl 6 development. Sometimes he can be found
+on IRC as PerlJam in one of the perl-related channels. But if you really
+want to get in touch with him, the best way is via email: duff@pobox.com
+
