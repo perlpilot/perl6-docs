@@ -1,1 +1,17 @@
 Documents relating to Perl 6
+
+This repository is divided into several sections.
+
+    * Introductions
+    * Tutorials
+    * Quick References
+
+Introductions are explanatory but not comprehensive texts that give
+enough detail to get someone started in a particular area.
+
+Tutorials are directed, step-by-step expositions of some particular
+aspect of Perl 6. They should take the reader from no knowledge to a
+solid understanding of the subject matter.
+
+Quick References are compact, terse, bits of information that can be
+looked up quickly.
