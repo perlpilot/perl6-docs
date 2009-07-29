@@ -847,22 +847,25 @@ explanation of the features mentioned in this article.
 
 =head2 References
 
-If you want to read more about Perl 6 regex, see the definitive
-reference at L<http://dev.perl.org/perl6/doc/design/syn/S05.html>.
-There are also some historical documents at
-L<http://dev.perl.org/perl6/doc/design/apo/A05.html> and 
-L<http://dev.perl.org/perl6/doc/design/exe/E05.html> that may give
-you a feel for things. If you're really interested in learning more
-but feel you need to interact with people try the mailing list at
-perl6-language@perl.org or log on to a freenode IRC server and drop by
-#perl6.
+If you want to read more about Perl 6 regex, see the official Perl 6
+documentation at L<http://perlcabal.org/syn/S05.html>. There are also
+some historical documents at
+L<http://dev.perl.org/perl6/doc/design/apo/A05.html> and
+L<http://dev.perl.org/perl6/doc/design/exe/E05.html> that may give you a
+feel for things. If you're really interested in learning more but feel
+you need to interact with people try the mailing list at 
+perl6-language@perl.org or log on to a freenode IRC server and drop 
+by #perl6.
 
 =head2 About the Author
 
-Jonathan Scott Duff works as an Applications Architect at an Austin-based
-software development company. He has a beautiful wife and 4 lovely
+Jonathan Scott Duff is an Information Technology Research Manager at the
+Conrad Blucher Institute for Surveying and Science on the campus of
+Texas A&M University-Corpus Christi.  He has a beautiful wife and 4 lovely
 children. When not working or spending time with his family, Scott tries
 to keep up with Parrot and Perl 6 development. Sometimes he can be found
 on IRC as PerlJam in one of the perl-related channels. But if you really
 want to get in touch with him, the best way is via email: duff@pobox.com
 
+
+Copyright 2007-2009 Jonathan Scott Duff
