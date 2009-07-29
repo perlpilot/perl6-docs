@@ -19,6 +19,10 @@ All other characters preceded by a backslash are literal.
 
 =head2 Built-in assertions
 
+A leading C<!> indicates a negative zero-width assertion.
+A leading C<?> indicates a positive zero-width assertion.
+A leading C<.> indicates to not capture the value in to the data structure of C<$/>
+
     Assertion   Matches
     <ident>     an identifier
     <alpha>     an alphabetic character
@@ -52,32 +56,61 @@ Zero-width assertions
 
 Modifiers may appear at the start any group
 
- :cont          :c      Continue from where the previous match left off
- :words         :w      Match a sequence of "words". Causes whitespace 
-                        (which is normally ignored) to be replaced by \s+ 
-                        between identifiers and \s* anywhere else
+ :continue      :c      Match starting from a given position (defaults to $/.to)
+ :pos           :p      Match only at a specified position (defaults to $/.to)
+ :sigspace      :s      replaces whitespace in pattern with <.ws>
  :ignorecase    :i      Match all alphabetic characters in a case insensitive manner
- :any           :a      returns a list of anywhere the pattern matches within the string regardless of overlap
- :each          :e      apply the pattern iteratively ("each" time we can)
- :once          :o      Match succeeds exactly once. To allow the RE to match again, execute the .reset() method on the RE object.
- :perl5         :p5     Perl 5 matching. Cause the RE to be interpreted using the Perl 5 rules
- ?              :u0     Level 0 Unicode support. A . (dot) matches bytes
- ?              :u1     Level 1 Unicode support. A . (dot) matches code points
- ?              :u2     Level 2 Unicode support. A . (dot) matches a grapheme
- ?              :u3     Level 3 Unicode support. What . (dot) matches is language dependent
+ :ignoreaccent  :a      Match all alphabetic characters ignoring any accent marks
+ :sameaccent    :aa     Match all alphabetic characters ignoring any accent marks
+ :global        :g      Match globally within the string.
+
+ :rw                    claim the current string for modification
+ :keepall               cause the grammar to keep everything that was matched in $/
+ :ratchet               No backtracking
+ :panic                 backtrack mercilessly
+ :overlap       :ov     matches at all possible character positions (including overlap)
+ :exhaustive    :ex     match in every possible way
+
+ :Perl5         :P5     Perl 5 matching. Cause the RE to be interpreted using the Perl 5 rules
+
+ :bytes         :u0     Level 0 Unicode support. A . (dot) matches bytes
+ :codes         :u1     Level 1 Unicode support. A . (dot) matches code points
+ :graphs        :u2     Level 2 Unicode support. A . (dot) matches a grapheme
+ :chars         :u3     Level 3 Unicode support. What . (dot) matches is language dependent
+
  :nth(1)        :1st    only match the first occurance of the pattern
  :nth(2)        :2nd    only match the second occurance of the pattern
  :nth(3)        :3rd    only match the third occurance of the pattern
  :nth(4)        :4th    only match the fourth occurance of the pattern
  :nth(5)        :5th    only match the fifth occurance of the pattern
  ...             ...    ...
+
  :x(1)          :1x     Match one time
  :x(2)          :2x     Match two times
  :x(3)          :3x     Match three times
  ...             ...    ...
     
 
+Deprecated?
+ :each          :e      apply the pattern iteratively ("each" time we can)
+ :once          :o      Match succeeds exactly once. To allow the RE to match again, 
+                        execute the .reset() method on the RE object.
+
 =head2 Character class short-cuts
+
+Upper case versions match anything but the character class matched by
+the lower case version.  For instance, C<\s> matches whitespace and
+C<\S> matches any non-whitespace.
+
+    \s  <ws>    whitespace
+    \v  <vws>   vertical whitespace
+    \h  <vws>   horizontal whitespace
+    \d  <digit> digits
+    \f          form feed
+    \t          tab
+    \r          return
+    \n          logical newline
+
 
 =head2 Miscellaneous
 
