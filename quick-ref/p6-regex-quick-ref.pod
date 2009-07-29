@@ -102,3 +102,8 @@ rx/.../
 regex { }
 token { }
 rule { }
+
+
+=head2 Author
+
+Copyright 2009 Jonathan Scott Duff  <duff@pobox.com>
