@@ -1,0 +1,104 @@
+=head1 Perl 6 Regex Quick Reference
+
+=head2 Syntax
+
+All alphanumeric characters match themselves.
+
+All other characters may be meta-syntactic.
+
+An alphanumeric character preceded by a backslash is meta-syntactic.
+
+All other characters preceded by a backslash are literal.
+
+    (...)   capturing brackets
+    [...]   grouping brackets (non capturing)
+    {...}   closure (return value ignored unless assigned)
+    <...>   Assertion (does this thing match?)
+    :...    introduces a modifier
+
+
+=head2 Built-in assertions
+
+    Assertion   Matches
+    <ident>     an identifier
+    <alpha>     an alphabetic character
+    <digit>     a digit character
+    <alnum>     an alphanumeric character
+    <space>     a single whitespace character
+    <blank>     space or tab
+    <xdigit>    a hexadecimal character
+    <print>     a printable character
+    <graph>     a graphic character
+    <cntrl>     a control character
+    <punct>     a punctuation character
+
+Zero-width assertions
+    
+    Assertion       Matches
+    ^               start of string
+    ^^              start of line within a string
+    $               end of string
+    $$              end of line within a string
+    <before ...>    lookahead
+    <after ...>     lookbehind
+    <wb>            a word boundary (transistion from \w to \W or vice versa)
+    <ww>            between two word characters
+    <ws>            any amount of whitespace between two word characters
+    <?>             null string (always true)
+    <!>             inverse of <?> (always false)
+    <fail>          causes the match to fail.
+
+=head2 Regex Modifiers
+
+Modifiers may appear at the start any group
+
+ :cont          :c      Continue from where the previous match left off
+ :words         :w      Match a sequence of "words". Causes whitespace 
+                        (which is normally ignored) to be replaced by \s+ 
+                        between identifiers and \s* anywhere else
+ :ignorecase    :i      Match all alphabetic characters in a case insensitive manner
+ :any           :a      returns a list of anywhere the pattern matches within the string regardless of overlap
+ :each          :e      apply the pattern iteratively ("each" time we can)
+ :once          :o      Match succeeds exactly once. To allow the RE to match again, execute the .reset() method on the RE object.
+ :perl5         :p5     Perl 5 matching. Cause the RE to be interpreted using the Perl 5 rules
+ ?              :u0     Level 0 Unicode support. A . (dot) matches bytes
+ ?              :u1     Level 1 Unicode support. A . (dot) matches code points
+ ?              :u2     Level 2 Unicode support. A . (dot) matches a grapheme
+ ?              :u3     Level 3 Unicode support. What . (dot) matches is language dependent
+ :nth(1)        :1st    only match the first occurance of the pattern
+ :nth(2)        :2nd    only match the second occurance of the pattern
+ :nth(3)        :3rd    only match the third occurance of the pattern
+ :nth(4)        :4th    only match the fourth occurance of the pattern
+ :nth(5)        :5th    only match the fifth occurance of the pattern
+ ...             ...    ...
+ :x(1)          :1x     Match one time
+ :x(2)          :2x     Match two times
+ :x(3)          :3x     Match three times
+ ...             ...    ...
+    
+
+=head2 Character class short-cuts
+
+=head2 Miscellaneous
+
+    A~B     goal-matching
+    A**B    B separated As
+
+=head2 Backtracking control
+
+    :           fails if backtracked into
+    ::          fails the inner-most group if backtracked into
+    :::         fails the inner-most rule if backtracked into
+    <cut>       fails the entire match if backtracked into and 
+                removes the portion of the string that matched 
+                to that point.
+    <commit>    fails the entire match if backtracked into
+
+=head2 Declarations
+
+/.../   create a regex and execute it immediately in boolean context
+m/.../
+rx/.../
+regex { }
+token { }
+rule { }
