@@ -1,0 +1,33 @@
+=head1 Introduction to Object Oriented Programming in Perl 6
+
+=head2 Preamble
+
+This introduction assumes some knowledge of Perl and minimal to no
+knowledge of object oriented programming.
+
+
+=head2 What is object oriented programming?
+
+=head2 What are objects?
+
+=head2 Creating objects
+
+class Point {
+    has $!x;
+    has $.y;
+    has $.z is rw;
+    my $foo;
+}
+
+=head2 Roles
+
+=head2 Inheritance
+
+
+=head2 Copyright and Author
+
+    Copyright 2009 
+    Jonathan Scott Duff 
+    duff@pobox.com
+
+=end
