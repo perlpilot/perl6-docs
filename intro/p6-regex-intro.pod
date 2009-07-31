@@ -149,8 +149,7 @@ space with a backslash or enclose the space in quotes.
 
 In future examples I will occasionally show a given regex in its spaced
 form. The spaced form is preferable when writing regex as it makes them
-easier to read later. The spaced form will be highlighted with the text
-"SPACED" so that you can see the difference in readability.
+easier to read later, and will be used from now on.
 
 =head2 Quantifiers
 
@@ -166,9 +165,9 @@ group of characters may be matched multiple times.
 
 Examples:
 
-    /fo*/           # will match "f", "fo", "foo", "fooo", etc.
-    /fo+/           # will match "fo", "foo", "fooo", "foooo", etc.
-    /fo?/           # will only match "f" or "fo" 
+    / fo* /         # will match "f", "fo", "foo", "fooo", etc.
+    / fo+ /         # will match "fo", "foo", "fooo", "foooo", etc.
+    / fo? /         # will only match "f" or "fo" 
 
 Note that in the above examples the quantifier is only applied to the
 preceding character. If you need to match a group of characters
@@ -180,9 +179,8 @@ quantifier that allows you to prescribe a specific number of times a
 particular pattern may match. To use the universal quantifier, you use
 two C<*> characters followed by a number or a range like so:
 
-    /fo**3/         # matches only "fooo"
-    /fo**3..5/      # matches one of "fooo", "foooo", or "fooooo"
-    / fo ** 3..5 /  # same as above SPACED for readability
+    / fo ** 3 /     # matches only "fooo"
+    / fo ** 3..5 /  # matches one of "fooo", "foooo", or "fooooo"
 
 You may also specify a closure after the C<**>, but that is beyond the
 scope of this introduction to explain.  See the references given at
@@ -195,7 +193,7 @@ the end of this article for more reading.
 As in Perl 5, the quantifiers are greedy.  That is, they try to
 consume as much of the target string as possible.  So the pattern
 
-    /.*abc/
+    / .* abc /
 
 when applied to the string "abcdefghujklmnopqrstuvwyxz" will first try
 to match the entire string (because C<.> matches any character and C<*>
@@ -208,10 +206,9 @@ Also as in Perl 5, the greediness of quantifiers can be "turned off" by
 adding a question mark (C<?>) immediately after the quantifier.
 So for instance,
 
-    /.*?abc/        # first tries to match nothing, then "abc"
-    /.+?abc/        # first tries matching one character, then "abc"
-    /.**?3..5abc/   # first tries matching three characters, then "abc"
-    / . **? 3..5 abc /      # same as above SPACED
+    / . *? abc /       # first tries to match nothing, then "abc"
+    / . +? abc /       # first tries matching one character, then "abc"
+    / . **?3..5 abc/   # first tries matching three characters, then "abc"
 
 The default behavior (greediness) can be thought of as the regex engine
 first matching the most characters that the quantifier will allow and
@@ -237,20 +234,19 @@ position. The mechism to do this in regex is called a "character class".
 Character classes are designated by C<< <[]> >> with the specific
 characters listed inside the brackets. For instance,
 
-    /foo<[dlt]>/        # matches "food", "fool" or "foot"
+    / foo <[dlt]> /      # matches "food", "fool" or "foot"
 
 The sequence C<< <[dlt]> >> represents any one of the characters "d", "l",
 or "t". You can also specify a set of contiguous characters to match
 using a range like so:
 
-    /<[a..d]>/          # matches one of "a", "b", "c", or "d"
+    / <[ a..d ]> /      # matches one of "a", "b", "c", or "d"
 
 You can also mix ranges and specific characters:
 
-    /<[a..dxyz]>/       # matches one of "a","b","c","d","x","y", or "z"
-    /<[xyza..d]>/       # same
-    /<[x..za..d]>/      # same
-    /<[ x..z a..d ]>/   # same SPACED
+    /<[ a..d xyz ]>/    # matches one of "a","b","c","d","x","y", or "z"
+    /<[ xyz a..d ]>/    # same
+    /<[ x..z a..d ]>/   # same
 
 Some character classes are so useful that they have their own
 designated short-cuts.  All of the character class short-cuts make use
@@ -286,8 +282,8 @@ meaning of C<.> maps neatly to the new C<\N> sequence.)
 Character classes bear a remarkable resemblance to sets.  In fact, you can "add"
 and "subtract" character classes much like you would sets:
 
-    /<[a..z]-[aeiou]>/      # Only match a consonant
-    /<[asdfg]+[hjkl;]>+/    # Only match a sequence of characters that can
+    /<[a..z] - [aeiou]>/    # Only match a consonant
+    /<[asdfg] + [hjkl;]> +/ # Only match a sequence of characters that can
                             # be made from home row keys.
 
 
@@ -299,16 +295,15 @@ quotes. Quoting does two things, it forces all of the characters between
 the quotes to be treated literally and it groups the string of
 characters together into a quantifiable unit.
 
-    /'foo.'*/       # will match "foo.", "foo.foo.", "foo.foo.foo.", etc.
+    / 'foo.' * /    # will match "foo.", "foo.foo.", "foo.foo.foo.", etc.
 
 Another way to create a quantifiable unit is to use square brackets
 (C<[]>).  Square brackets delimit a portion of the regex that may be
 treated as a whole.  The text in between the brackets is just another
 regex.
 
-    /f[oo]*/        # will match "f", "foo", "foooo", "foooooo", etc.
-    /a[bc*d]?/      # will match "a", "abd", "abcd", "abccd", "abcccd", etc.
-    / a [ bc* d ]? /        # same as above SPACED
+    / f[ oo ]* /       # will match "f", "foo", "foooo", "foooooo", etc.
+    / a[ bc* d ]? /    # will match "a", "abd", "abcd", "abccd", "abcccd", etc.
 
 Yet another way to group a portion of a regex to be treated as a unit is
 to use round brackets (C<()>). These are identical to square brackets
@@ -354,7 +349,7 @@ alternations with no inherent order as to which alternative is tried
 first.  So, for instance, if we were matching the string
 "football", the following regex
 
-    / f | fo | foo /                        # SPACED
+    / f | fo | foo /
 
 would match "foo" since that's the longest matching portion of the
 regex in the alternation.  But the regular expression engine may have
@@ -364,7 +359,7 @@ regex engine implementation as to how the alternatives are tried.
 
 Had the regex been
 
-    / f | fo | fo.*l | foo /                # SPACED
+    / f | fo | fo.*l | foo /
 
 then the third item in the alternation would be matched since
 C<fo.*l> will match the entire string. Again, which order the
@@ -373,7 +368,7 @@ alternatives are tried is unspecified.
 A double vertical bar (C<||>) will match each alternative in a left-to-
 right manner. That is, the regex
 
-    /  f || fo || foo /                     # SPACED
+    /  f || fo || foo /
 
 will first try to match "f", and then (if it failed to match "f") try
 to match "fo", and finally it will try to match "foo". So, were the
@@ -405,7 +400,7 @@ ampersand matches exactly 3 characters and the subpattern on the left
 matches any sequence of lower case letters. By comparison, had the regex
 been (still applied to the string "blah"):
 
-    / <[a..z]>+ && [ ... ] /                    # SPACED
+    / <[a..z]>+ && [ ... ] /
 
 It B<still> would match "bla" but how it arrives at that match is
 slightly different.  First, the left hand side of the C<&&> would match
@@ -426,7 +421,7 @@ portion of a regex may match one more or one fewer times. Backtracking
 is caused by the regex engine's attempt to satisfy an overall match. For
 instance, when matching the following regex against the string "footbag"
 
-    / [ foot || base || hand ] ball /           # SPACED
+    / [ foot || base || hand ] ball /
 
 the regex engine will match "foot" and then attempt to match "ball" when
 it realizes that "ball" will not match, it backtracks to the point where
@@ -453,7 +448,7 @@ try the other alternatives once one of them matched (because I, as the
 person writing the regex, know that they are all mutually exclusive),
 I simply follow the group with a colon like so:
 
-    / [ foot || base || hand ] : ball /         # SPACED
+    / [ foot || base || hand ] : ball /
 
 As soon as one of the alternatives match, the regex engine will move
 past the colon and try to match C<ball>. When it fails to match C<ball>,
@@ -506,7 +501,7 @@ line sequence within the string (i.e. "\n" terminates each line))
 
     / ^the \s+ \w+ /    "the quick"
     / \w+ $ /           "dog"
-    / ^^\w+ /           "the", "brown", "jumped", "the", and "dog"
+    / ^^ \w+ /          "the", "brown", "jumped", "the", and "dog"
     / \w+ $$ /          "quick", "fox", "over", "lazy", and "dog"
     / << o\w+ /         "over"
     / o \w+ >> /        "own", "over", "og"
@@ -514,7 +509,7 @@ line sequence within the string (i.e. "\n" terminates each line))
 In order for the patterns that would match multiple portions of the string 
 to actually match those substrings, there needs to be some way to tell the regex
 engine to continue matching from where the last match left off. See L<modifiers>
-below)
+below.
 
 =head2 Interacting with Perl 6
 
@@ -598,8 +593,8 @@ to be agnostic towards case distinctions in alphabetic characters.
 There's also a short-hand for this modifier for those times when
 C<ignorecase> is too much to type out.
 
-        $foo ~~ m:ignorecase/ foo /;    # will match "foo", "FOO", "fOo", etc.
-        $foo ~~ m:i/ foo /;             # same
+        $foo ~~ m :ignorecase/ foo /;    # will match "foo", "FOO", "fOo", etc.
+        $foo ~~ m :i/ foo /;             # same
 
 Perl 6 predefines several of these modifiers (for a complete list,
 see L<S05>):
@@ -615,7 +610,7 @@ see L<S05>):
     :pos            :p              Just like :c but pattern is
                                     anchored where the previous match left off
     :ratchet                        Don't do any backtracking
-    :bytes                          dot matches bytes
+    :bytes                          dot matches  bytes
     :codes                          dot matches codepoints
     :graphs                         dot matches language-independent graphemes
     :chars                          dot matches "characters" at current 
@@ -634,8 +629,8 @@ forms consist of a number followed by some text:
 Here are some examples to illustrate these modifiers:
 
     $_ = "foo bar baz blat";
-    m:3x/a/                 # matches the "a" characters in each word
-    m:nth(3)/\w+/           # matches "baz"
+    m :3x/ a /              # matches the "a" characters in each word
+    m :nth(3)/ \w+ /        # matches "baz"
 
 Some of these modifiers may also be placed inside the regular expression and
 their effect is scoped until the end of the innermost enclosing
