@@ -15,3 +15,12 @@ solid understanding of the subject matter.
 
 Quick References are compact, terse, bits of information that can be
 looked up quickly.
+
+What's the difference between this repository and Userdocs for
+Christmas (u4x)?  (See http://use.perl.org/~masak/journal/38279 and
+http://nix.is/gsoc/gsoc-u4x.html)
+
+The documents in this repository are just documents about Perl 6.  They
+aren't necessarily documentation.  While u4x aims to be comprehensive
+documentation for Perl 6, the documents here are almost explicitly NOT
+comprehensive.
