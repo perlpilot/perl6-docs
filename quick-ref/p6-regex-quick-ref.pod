@@ -16,6 +16,24 @@ All other characters preceded by a backslash are literal.
     <...>   Assertion (does this thing match?)
     :...    introduces a modifier
 
+=head2 Quantifiers
+
+Quantifiers specify how often the preceeding term has to match. There is a
+non-greedy variant of each quantifier which you get by appending a question
+mark C<?> to the quantifier
+
+    ?               zero or one match
+    *               at least zero matches
+    +               at least one match
+    ** NUM          exactly NUM matches
+    ** NUM1..NUM2   NUM1 to NUM2 matches
+
+=head2 Conjuctions and disjunctions
+
+    A |  B     match A or B; longest match wins
+    A || B     match A or B; first match wins
+    A &  B     match A and B with same length
+    A && B     match A and B with same length; guarentueed order of execution
 
 =head2 Assertions
 
