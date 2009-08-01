@@ -17,13 +17,37 @@ All other characters preceded by a backslash are literal.
     :...    introduces a modifier
 
 
-=head2 Built-in assertions
+=head2 Assertions
 
-A leading C<!> indicates a negative zero-width assertion.
-A leading C<?> indicates a positive zero-width assertion.
-A leading C<.> indicates to not capture the value in to the data structure of C<$/>
+Assertions have different behavior depending on the characters after the C<< < >>.
 
-    Assertion   Matches
+
+Characters  Indicates
+whitespace  the <> function as "quote words"
+alphabetic  a capturing named assertion (also called a subrule)
+C<!>        a negative zero-width assertion.
+C<?>        a positive zero-width assertion.
+C<.>        non capturing assertion
+C<[>        character class
+C<+>        character class
+C<->        negated character class
+C<$>        indirect subrule
+C<::>       symbolic indirect subrule
+C<@>        array of subrules  (/<@foo>/, each element of @foo is a subrule)
+C<{>        code to be interpolated into the regex
+C<&>        subroutine, return value is subrule
+C<?{>       declarative code assertion, code must be true
+C<!{>       declarative code assertion, code must be false
+C<*>        Partial match, succeeds on any prefix
+
+C<~~>       Recursive callback into current rule
+
+C<< <...> >>       special "undefined" subrule, fails
+C<< <???> >>       special "undefined" subrule, warns
+C<< <!!!> >>       special "undefined" subrule, dies
+
+=head2 Built-in named Assertions
+
     <ident>     an identifier
     <alpha>     an alphabetic character
     <digit>     a digit character
@@ -35,6 +59,7 @@ A leading C<.> indicates to not capture the value in to the data structure of C<
     <graph>     a graphic character
     <cntrl>     a control character
     <punct>     a punctuation character
+    <ws>        any amount of whitespace between two word characters
 
 Zero-width assertions
     
@@ -46,8 +71,9 @@ Zero-width assertions
     <before ...>    lookahead
     <after ...>     lookbehind
     <wb>            a word boundary (transistion from \w to \W or vice versa)
+    <<              left word boundary
+    >>              right word boundary
     <ww>            between two word characters
-    <ws>            any amount of whitespace between two word characters
     <?>             null string (always true)
     <!>             inverse of <?> (always false)
     <fail>          causes the match to fail.
@@ -106,6 +132,7 @@ C<\S> matches any non-whitespace.
     \v  <vws>   vertical whitespace
     \h  <vws>   horizontal whitespace
     \d  <digit> digits
+    \w  <words> "word" characters
     \f          form feed
     \t          tab
     \r          return
@@ -129,12 +156,13 @@ C<\S> matches any non-whitespace.
 
 =head2 Declarations
 
-/.../   create a regex and execute it immediately in boolean context
-m/.../
-rx/.../
-regex { }
-token { }
-rule { }
+/.../       create a regex (only execute it immediately in boolean context)
+m/.../      create a regex and immediately execute it
+mm/.../     same as m/.../ but with :sigspace on
+rx/.../     
+regex { }   create a regex 
+token { }   same as regex but with :ratchet on
+rule { }    same as token but with :sigspace also on.
 
 
 =head2 Author
