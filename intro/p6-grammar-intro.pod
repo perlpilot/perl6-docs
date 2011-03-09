@@ -1,0 +1,145 @@
+=head1 Introduction to Perl 6 Grammars
+
+=head2 Audience
+
+This text assumes that you have a cursory understanding of Perl 6 and
+some knowledge of Perl 6 regex and are familiary with the concepts of
+object oriented programming (but not necessarily in Perl 6). No deep
+knowledge of these subjects is required; most concepts will be explained
+in detail as if the reader has very little understanding of them. At the
+end of this introduction, the reader should be able to undertand and use
+grammars in Perl 6.
+
+The examples in this introduction were all validated against the Rakudo
+Perl 6 compiler which can be found at L<http://rakudo.org/downloads> and
+L<http://github.com/rakudo/rakudo/downloads>. There is also a more
+complete Perl 6 distribution built on top of Rakudo called C<Rakudo Star>.
+This distribution may be found at L<http://github.com/star/dowloads> and
+comes with several useful modules, some of which illustrate Perl 6
+Grammars.
+
+=head2 Regex
+
+The foundation of grammars in Perl 6 is the ability to do pattern matching
+on strings.  This is accomplished in Perl 6 through the use of C<regex>.
+A C<regex> in Perl 6 parlance is the natural evolution of C<regular expressions>.
+Regular expressions are a small, compact language used to describe strings
+of text.  How they differ is that while regular expressions are
+declarative in nature, regex may have some procedural aspects.
+
+Below are some examples of regex in Perl 6:
+
+    / abc /         # match the string "abc"
+    / a b* /        # match a string containing "a" and any number of "b"
+                    # (including none)
+    / ^ a* $ /      # match a string consisting entirely of "a" characters
+    / \w+ /         # match a string containing a sequence of word characters
+    / \d+ /         # match a string containing a sequence of digits
+
+Regex are traditionally delimited by slash characters (C</>), but Perl 6
+allows you to use many alternate delimiters.  As we'll see below, a
+popular delimiter are curly braces (C<{> and C<}>).
+
+=head2 Named Regex
+
+Applying regex to a string is useful in that it gives you a yes/no
+response answering the question, "Does the string match this pattern?"
+However, as regex become more complicated, it makes sense that you would
+want to give meaningful names to portions of the regex.  For instance, to
+match a person's name you could use a regex like this:
+
+    / \w+ \w+ \w+ /     # first name, middle name, last name
+
+But wouldn't it be a little more useful to the person reading that regex
+to name the pieces something like this:
+
+    / <first-name> <middle-name> <last-name> /
+
+Sure, that's a little more verbose, but it eliminates some commentary and
+makes the code a little more self-documenting.  Now when someone changes
+the code they would I<also> change commentary rather than have those two
+things separate so that the comments could become out of sync with the
+code.
+
+Perl 6 allows you to declare a meaningful name for your regex just as you
+would give meaningful names to your subroutines.  So, the above regex may
+have been declared thusly:
+
+    regex person's-name { <first-name> <middle-name> <last-name> }
+    regex first-name { \w+ }
+    regex middle-name { \w+ }
+    regex last-name { \w+ }
+
+Since named regex are analogous to subroutines, we've switched to using
+curly braces as the regex delimiter and using an explicit declarator
+C<regex>.  Before, when we used the C</ ... /> syntax, it was a short-hand
+for auto-declaring a regex as if we'd said C<regex { ... }>.  The slash
+syntax exists for historical reasons and because it's such a common
+occurence to declare and immediately use the regex that it deserves a
+short syntaxN<This is a principle know as I<Huffman Encoding>.  David
+Huffman showed that the maximum compression technique utilizing
+"dictionaries" would encode the most frequent token with the shortest
+sequence.  Perl 6 applies this principle to language design so that the
+more frequently used constructs are relatively short and constructs that
+I<should> be used less frequently are longer.>.
+
+Another benefit, besides self documentation is that when a pattern match
+succeeds, you may ask about portions of the match in a meaningful way.
+Once you've matched the C<person's-name>, how do you know their last
+name?  With a named regex, you can extract that bit by name.
+
+=head2 Grouping named Regex
+
+At last we come to it.  Grammars.  Naming regex is fine, but just as
+subroutines can be grouped into logically cohesive groups, so too can
+regex.  This is the function of a grammar.
+
+A grammar allows you to think of higher-level concepts as a unit.  Rather
+than a regex to match a persons name and a regex to match an address and a
+regex to match a phone number and so forth, you can have a grammar that
+matches an employee record. Rather than just a regex that matches tags and
+a regex that matches attributes, you can have a grammar that matches XML.
+
+    grammar {
+    }
+
+=head2 Building a Grammar
+
+
+=head2 Debugging
+
+There's a special named regex available in Rakudo to aid in debugging your
+grammars when you think they should match and they do not.  Adding
+C« <?DEBUG> » anywhere within a grammar will cause the parsing information
+to be output to standard error from that point on as the parse happens.
+
+=head2
+
+
+
+=head2 References
+
+For more information on Perl 6 grammars, see the official Perl 6
+documentation at L<http://perlcabal.org/syn/S05.html>. There are also
+some historical documents at
+L<http://dev.perl.org/perl6/doc/design/apo/A05.html> and
+L<http://dev.perl.org/perl6/doc/design/exe/E05.html> that may give you a
+feel for things. If you're really interested in learning more but feel
+you need to interact with people try the mailing list at
+perl6-language@perl.org or log on to a freenode IRC server and drop
+by #perl6.
+
+=head2 About the Author
+
+Jonathan Scott Duff is an Information Technology Research Manager at the
+Conrad Blucher Institute for Surveying and Science on the campus of
+Texas A&M University-Corpus Christi.  He has a beautiful wife and 4 lovely
+children. When not working or spending time with his family, Scott tries
+to keep up with Parrot and Perl 6 development. Sometimes he can be found
+on IRC as PerlJam in one of the perl-related channels. But if you really
+want to get in touch with him, the best way is via email:
+L<duff@pobox.com>
+
+
+Copyright 2011 Jonathan Scott Duff
+
