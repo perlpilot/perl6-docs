@@ -2,15 +2,66 @@
 
 =head2 Preamble
 
-This introduction assumes some knowledge of Perl and minimal to no
-knowledge of object oriented programming.
-
+This introduction assumes some knowledge of Perl 6 and minimal to no
+knowledge of object oriented programming.  Upon completion, you should
+understand the basics of object oriented programming and be able to create
+and manipulate objects in Perl 6.
 
 =head2 What is object oriented programming?
 
-=head2 What are objects?
+Object oriented programming is a philosophy of wrapping data and the
+operations that can be performed on that data into a single structure,
+typically called an "object".  Some languages have built-in language
+support for creating object definitions and manipulating objects, others do
+not but still may be programmed in an object oriented fashion.  For
+instance, the programming language C<C> does not have language support for
+objects, but through creative use of C<typedef> and pointers, it can be
+programmed as if it were object oriented. 
+
+The main idea is that objects and their operations are tightly coupled.
+The go together. Changing one may affect the other. So this relationship
+should be made explicit in some way. In C<C> that way is by writing code
+in a special fashion. In languages that have built-in support for object
+oriented programming, that way is the language constructs that declare
+objects or groups of objects that follow the same patterns of behavior.
 
 =head2 Creating objects
+
+So how do we accomplish object oriented programming in Perl 6? 
+
+To create a new type of object, we first must describe what objects of that
+type should look like:  what data should it encapsulate, what subroutines
+should act upon that data, what interface should the object present to the
+outside world, etc.  We do this in Perl 6 with the C<class> declarator.
+
+=for example
+
+class Thingy { }
+
+=end
+
+This describes a new class of objects called C<Thingy>. Ordinarily,
+there would be other declarations inside of the curly braces, but the
+above is close to the simplest class definition you can createN<The
+simplest class definition actually omits the name to create an anonymous
+class, but more about that later.>. There are no subroutines to
+manipulate data because there is no data to act upon. There is only a
+name that Perl 6 now knows about, so that when it sees C<Thingy> in the
+future, it will know to reference this class definition.
+
+All objects come with a pre-defined set of behavior built-in.  One such
+behavior is the ability to create new objects.  So, in order to create a
+C<Thingy> object from the above class definition, you would do:
+
+=for example
+
+my $object = Thingy.new;
+
+=end
+
+
+
+
 
 class Point {
     has $!x;
@@ -21,12 +72,17 @@ class Point {
 
 =head2 Roles
 
+=head2 Delegation
+
 =head2 Inheritance
 
+Remember before when we said that all objects come with a pre-defined set
+of behavior?  Ultimately this is because all objects implicitly inherit
+from some built-in objects that have these behaviors.
 
 =head2 Copyright and Author
 
-    Copyright 2009 
+    Copyright 2010 
     Jonathan Scott Duff 
     duff@pobox.com
 
