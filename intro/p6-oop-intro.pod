@@ -19,18 +19,19 @@ objects, but through creative use of C<typedef> and pointers, it can be
 programmed as if it were object oriented. 
 
 The main idea is that objects and their operations are tightly coupled.
-The go together. Changing one may affect the other. So this relationship
-should be made explicit in some way. In C<C> that way is by writing code
-in a special fashion. In languages that have built-in support for object
-oriented programming, that way is the language constructs that declare
+They go together. Changing one may affect the other. So this
+relationship should be made explicit in some way. In C<C> that
+relationship would be obtained by writing code in a special fashion. In
+languages that have built-in support for object oriented programming,
+that relationship is made explicit by language constructs that declare
 objects or groups of objects that follow the same patterns of behavior.
 
-=head2 Creating objects
+=head2 Creating objects (almost)
 
 So how do we accomplish object oriented programming in Perl 6? 
 
-To create a new type of object, we first must describe what objects of that
-type should look like:  what data should it encapsulate, what subroutines
+To create a new object, we first must describe what these objects 
+should look like:  what data should it encapsulate, what subroutines
 should act upon that data, what interface should the object present to the
 outside world, etc.  We do this in Perl 6 with the C<class> declarator.
 
@@ -49,6 +50,39 @@ manipulate data because there is no data to act upon. There is only a
 name that Perl 6 now knows about, so that when it sees C<Thingy> in the
 future, it will know to reference this class definition.
 
+To give objects of a class some data to act upon, we have to declare some
+data slots within the class definition.  Perl 6 lets you do this with the
+C<has> declarator within a class definition:
+
+=for example
+
+class Thingy {
+    has $!stuff;
+}
+
+=end
+
+The C<has> declarator just sets aside a slot of the appropriate shape so
+that when objects of this class are created, storage for the actual data
+can be generated and used by the object.  For the most part these data
+slots are described just as you would describe any other variable within a
+Perl program.  They can be scalars, arrays, hashes, etc.  The big
+difference though is that, in addition to the main sigil that describes
+the interface for the variable, it has a I<twigil> or a secondary sigil
+that describes the variable access.  In the above class definition, the
+C<Thingy> class has a single scalar slot as indicated by the C<$> in
+C<has $!stuff>, and that scalar is "private" to this class.  That's what
+the C<!> twigil means.  This variable can only be accessed from within the
+class definition or from methods that belong to this class.
+
+
+    methods
+
+    . twigil
+
+
+=head2 Creating objects (really this time)
+
 All objects come with a pre-defined set of behavior built-in.  One such
 behavior is the ability to create new objects.  So, in order to create a
 C<Thingy> object from the above class definition, you would do:
@@ -59,8 +93,10 @@ my $object = Thingy.new;
 
 =end
 
-
-
+The object created in C<$object> will have all of the characteristics of a
+C<Thingy>.  Whatever data slots were described in the class definition for
+C<Thingy> objects will be present in C<$object>.  Whatever methods were
+defined for C<Thingy> objects will be available to C<$object>
 
 
 class Point {
@@ -82,7 +118,7 @@ from some built-in objects that have these behaviors.
 
 =head2 Copyright and Author
 
-    Copyright 2010 
+    Copyright 2011 
     Jonathan Scott Duff 
     duff@pobox.com
 
