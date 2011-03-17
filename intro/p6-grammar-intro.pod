@@ -3,7 +3,7 @@
 =head2 Audience
 
 This text assumes that you have a cursory understanding of Perl 6 and
-some knowledge of Perl 6 regex and are familiary with the concepts of
+some knowledge of Perl 6 regex and are familiar with the concepts of
 object oriented programming (but not necessarily in Perl 6). No deep
 knowledge of these subjects is required; most concepts will be explained
 in detail as if the reader has very little understanding of them. At the
@@ -37,8 +37,8 @@ Below are some examples of regex in Perl 6:
     / \d+ /         # match a string containing a sequence of digits
 
 Regex are traditionally delimited by slash characters (C</>), but Perl 6
-allows you to use many alternate delimiters.  As we'll see below, a
-popular delimiter are curly braces (C<{> and C<}>).
+allows you to use many alternate delimiters.  As we'll see below,
+popular delimiters are curly braces (C<{> and C<}>).
 
 =head2 Named Regex
 
@@ -51,15 +51,14 @@ match a person's name you could use a regex like this:
     / \w+ \w+ \w+ /     # first name, middle name, last name
 
 But wouldn't it be a little more useful to the person reading that regex
-to name the pieces something like this:
+if the pieces were named something like this:
 
     / <first-name> <middle-name> <last-name> /
 
 Sure, that's a little more verbose, but it eliminates some commentary and
 makes the code a little more self-documenting.  Now when someone changes
-the code they would I<also> change commentary rather than have those two
-things separate so that the comments could become out of sync with the
-code.
+the code they are I<also> changing comments.  Which, of course, eliminates
+the possibilty of them becoming out of sync.
 
 Perl 6 allows you to declare a meaningful name for your regex just as you
 would give meaningful names to your subroutines.  So, the above regex may
@@ -86,25 +85,123 @@ I<should> be used less frequently are longer.>.
 Another benefit, besides self documentation is that when a pattern match
 succeeds, you may ask about portions of the match in a meaningful way.
 Once you've matched the C<person's-name>, how do you know their last
-name?  With a named regex, you can extract that bit by name.
+name?  With a named regex, you can extract that part by name.
 
 =head2 Grouping named Regex
 
-At last we come to it.  Grammars.  Naming regex is fine, but just as
-subroutines can be grouped into logically cohesive groups, so too can
-regex.  This is the function of a grammar.
+At last we come to it. Grammars. Naming regex is fine, but just as
+subroutines can be grouped into logically cohesive groups (modules), so
+too can regex. This is the function of a grammar.
 
-A grammar allows you to think of higher-level concepts as a unit.  Rather
-than a regex to match a persons name and a regex to match an address and a
-regex to match a phone number and so forth, you can have a grammar that
-matches an employee record. Rather than just a regex that matches tags and
-a regex that matches attributes, you can have a grammar that matches XML.
+A grammar allows you to think of higher-level concepts as a unit. Rather
+than just a regex to match a person's name and a regex to match an
+address and a regex to match a phone number and so forth, you can have a
+grammar that matches an employee record. Rather than just a regex that
+matches tags and a regex that matches attributes, you can have a grammar
+that matches XML.
 
-    grammar {
+Grammars are declared in Perl, oddly enough, with the C<grammar>
+declarator:
+
+    grammar Some-Name-Here {
+        # named regex here
     }
+
+Any of the named regex within the block "belong" to the grammar.  When
+they are mentioned within other named regex, Perl will first look within
+the grammar for a regex with the appropriate name.
+
+Below is a grammar for ...
+
+
+=head2 Calling named regex
+
+=head2 Named regex parameters
+
+=head2 proto
+
+=head2 Classy behavior
+
+A grammar is really just a funny kind of class. 
+
+=begin notes
+
+    inheritance, roles
+
+=end notes
+
+
+=head2 Don't just parse there!  I<Do> something!
+
+Just being able to parse a string and being able to understand its
+components is great, but often times, you want to I<do> something as you
+parse.  And more often than not, what you do depends on the text that
+you've parsed.
+
+Like anything else in Perl, there's more than one way to do it, and which
+way you choose will depend on your exact needs.  The simplest way is
+probably just to include the code directly in the regex that make up your
+grammar.
+
+=for example
+
+    grammar Foo {
+        regex foo  { blah blah { say "hi" } blah blah }
+    }
+
+=end for
+
+In Perl 6, the curly braces are consistently used to denote and executable
+block of code--even in a regex. If the portion of the regex before the
+code block matches, then the code block is immediately executed.  Be
+careful though, if, in the process of matching a string, your regex
+happens to backtrack across the code block, it will be executed as
+the parse moves forward across it again and again.  As a simple example of
+this phenomenon, consider the following bit of code:
+
+    "aaa" ~~ / a { say "hi" } b /
+
+As the regex engine tries to match the "ab" sequence, it will match the
+first "a" in the string, then execute the code (and say "hi"), then
+attempt to match a "b".  Since there is no "b" immediately after the first
+"a" in the string, the regex engine skips ahead one character and tries
+again.  Again, it matches an "a", says "hi", fails to match a "b" and then
+backtracks.  On the third attempt, the same sequence of events happens
+except this time it runs out of string attempting to match the "b" and so
+the process ends with a failed pattern match.  However, whether the match
+succeeds or fails, it still outputs "hi" 3 times.
+
+As should be evident from the example above, the ability to execute code
+in this manner really has nothing to do with grammars, but is a feature of
+regex in general.
+
+Another mechanism to execute arbitrary code while parsing the grammar is
+to create a method within the grammar and then include a zero-width call
+to it at the point in the parse were you want the code to execute.
+
+    grammar foo {
+        regex foo { <.setup> blah blah }
+        method setup {
+            # do stuff here
+        }
+    }
+
+Remember before when we mentioned that a grammar is just a funny kind of
+class? The ability to define methods on the grammar is just another
+manifestation of that.  
+
+=begin notes
+
+    make
+
+=end notes
 
 =head2 Building a Grammar
 
+
+=head2 Using Grammars
+
+    my $match = Grammar.parse($text, :action<A>, :rule<TOP>)
 
 =head2 Debugging
 
@@ -112,9 +209,6 @@ There's a special named regex available in Rakudo to aid in debugging your
 grammars when you think they should match and they do not.  Adding
 C« <?DEBUG> » anywhere within a grammar will cause the parsing information
 to be output to standard error from that point on as the parse happens.
-
-=head2
-
 
 
 =head2 References
@@ -139,7 +233,6 @@ to keep up with Parrot and Perl 6 development. Sometimes he can be found
 on IRC as PerlJam in one of the perl-related channels. But if you really
 want to get in touch with him, the best way is via email:
 L<duff@pobox.com>
-
 
 Copyright 2011 Jonathan Scott Duff
 
