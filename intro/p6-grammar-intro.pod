@@ -40,6 +40,12 @@ Regex are traditionally delimited by slash characters (C</>), but Perl 6
 allows you to use many alternate delimiters.  As we'll see below,
 popular delimiters are curly braces (C<{> and C<}>).
 
+The result of a pattern match using a regex is a I<Match object> which can
+provide the results of the match in various ways.  In a boolean context it
+just returns a true or false value to tell you whether the match succeeded
+or not.  And in a list context you get all of the portions of the string
+that were captured within the pattern.  See below for more information.
+
 =head2 Named Regex
 
 Applying regex to a string is useful in that it gives you a yes/no
@@ -48,12 +54,12 @@ However, as regex become more complicated, it makes sense that you would
 want to give meaningful names to portions of the regex.  For instance, to
 match a person's name you could use a regex like this:
 
-    / \w+ \w+ \w+ /     # first name, middle name, last name
+    / \w+ \s+ \w+ \s+ \w+ /     # first name, middle name, last name
 
 But wouldn't it be a little more useful to the person reading that regex
 if the pieces were named something like this:
 
-    / <first-name> <middle-name> <last-name> /
+    / <first-name> \s+ <middle-name> \s+ <last-name> /
 
 Sure, that's a little more verbose, but it eliminates some commentary and
 makes the code a little more self-documenting.  Now when someone changes
@@ -64,7 +70,7 @@ Perl 6 allows you to declare a meaningful name for your regex just as you
 would give meaningful names to your subroutines.  So, the above regex may
 have been declared thusly:
 
-    regex person's-name { <first-name> <middle-name> <last-name> }
+    regex person's-name { <first-name> \s+ <middle-name> \s+ <last-name> }
     regex first-name { \w+ }
     regex middle-name { \w+ }
     regex last-name { \w+ }
@@ -87,6 +93,12 @@ succeeds, you may ask about portions of the match in a meaningful way.
 Once you've matched the C<person's-name>, how do you know their last
 name?  With a named regex, you can extract that part by name.
 
+Remember before when we said that the result of matching a regex to a
+string is a C<Match> object that can provide match results in various
+ways?  With a named regex, the C<Match> object can be treated like a hash
+with the name of the regex as the key and the portion of the string that
+was matched by that named regex as the value.
+
 =head2 Grouping named Regex
 
 At last we come to it. Grammars. Naming regex is fine, but just as
@@ -107,28 +119,50 @@ declarator:
         # named regex here
     }
 
-Any of the named regex within the block "belong" to the grammar.  When
-they are mentioned within other named regex, Perl will first look within
-the grammar for a regex with the appropriate name.
+Any of the named regex declared within the block "belong" to the
+grammar. When they are mentioned within other named regex, Perl will
+look within the grammar for a regex with the appropriate nameN<This
+isn't the whole truth, but that's why this is just an introduction and
+not a reference>.  This is B<very> similar to the way objects work.
+Gramars are analogous to classes and the named regex within are analogous
+to methods.
 
-Below is a grammar for ...
+=begin sidebar
 
+Even though you are free to name your regex however you like, some names
+Perl will utilize for its own purposes.  Typically anything in
+B<ALLCAPS> will be considered a name that Perl can use for some automatic
+or special behavior.  With grammars, a regex named C<TOP> is considered
+the entry point into the grammar.  It is the default rule when you try to "match"
+a string against the grammar.
+
+=end sidebar
 
 =head2 Calling named regex
 
+So, how do you "mention" a named regex?  Just as in the earlier examples, if
+you enclose the name in angle brackets (C<< < >> and C<< > >>), Perl will
+try to match that named regex at that point in the regex.  
+
+
+
 =head2 Named regex parameters
+
+
 
 =head2 proto
 
 =head2 Classy behavior
 
-A grammar is really just a funny kind of class. 
+The analog between grammars and classes runs quite deep. So deep, that
+grammars can inherit from other grammars just like classes may inherit
+from other classes. This is, in fact, how the built-in named regex are
+available to you. All grammars are automatically derived from the base
+C<Grammar> class which has the default definitions for the built-in
+named regex.
 
-=begin notes
-
-    inheritance, roles
-
-=end notes
+More over you can also compose grammars just like you'd compose classes by
+using roles.
 
 
 =head2 Don't just parse there!  I<Do> something!
@@ -151,7 +185,7 @@ grammar.
 
 =end for
 
-In Perl 6, the curly braces are consistently used to denote and executable
+In Perl 6, the curly braces are consistently used to denote an executable
 block of code--even in a regex. If the portion of the regex before the
 code block matches, then the code block is immediately executed.  Be
 careful though, if, in the process of matching a string, your regex
@@ -169,7 +203,7 @@ again.  Again, it matches an "a", says "hi", fails to match a "b" and then
 backtracks.  On the third attempt, the same sequence of events happens
 except this time it runs out of string attempting to match the "b" and so
 the process ends with a failed pattern match.  However, whether the match
-succeeds or fails, it still outputs "hi" 3 times.
+succeeds (if it had ended in a "b") or fails, it still outputs "hi" 3 times.
 
 As should be evident from the example above, the ability to execute code
 in this manner really has nothing to do with grammars, but is a feature of
@@ -186,9 +220,23 @@ to it at the point in the parse were you want the code to execute.
         }
     }
 
+    grammar C-enum {
+        rule enum {
+            "enum" <ident> "{" ~ "}" enum_list 
+        }
+        rule enum_list {
+            enum_value ** ","
+        }
+        rule enum_value { 
+            <ident> "=" <constant>
+        }
+    }
+
 Remember before when we mentioned that a grammar is just a funny kind of
 class? The ability to define methods on the grammar is just another
 manifestation of that.  
+
+
 
 =begin notes
 
@@ -197,6 +245,7 @@ manifestation of that.
 =end notes
 
 =head2 Building a Grammar
+
 
 
 =head2 Using Grammars
