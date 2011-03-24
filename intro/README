@@ -1,0 +1,14 @@
+These are relatively brief introductions to various concepts in Perl 6.
+Some are actually longish, but only because the subject matter is rather
+large.
+
+I'm starting with the things that interest me (after all, I'm the one
+doing the work), and will move on to other topics from there.  I don't really
+have a roadmap or layout of which topics I intend to cover, but I do know
+that there will be primarily some longish topics first (regex, grammars,
+smart matching, objects, etc.) and then later some not-so-long topics (meta-ops,
+hyperops, gather/take, given/when, exception handling, etc.).  But, who
+knows?  Maybe my estimation of the treatment each of these deserves as an
+introduction could be *way* off.
+
+-Scott
