@@ -67,8 +67,9 @@ the code they are I<also> changing comments.  Which, of course, eliminates
 the possibilty of them becoming out of sync.
 
 Perl 6 allows you to declare a meaningful name for your regex just as you
-would give meaningful names to your subroutines.  So, the above regex may
-have been declared thusly:
+would give meaningful names to your subroutines.  In fact, any legal
+identifier that can be used for a subroutine name may also be used for the
+name of your regex.  So, the above regex may have been declared thusly:
 
     regex person's-name { <first-name> \s+ <middle-name> \s+ <last-name> }
     regex first-name { \w+ }
@@ -88,6 +89,17 @@ sequence.  Perl 6 applies this principle to language design so that the
 more frequently used constructs are relatively short and constructs that
 I<should> be used less frequently are longer.>.
 
+=begin sidebar
+
+Even though you are free to name your regex however you like, some names
+Perl will utilize for its own purposes. Typically anything in B<ALLCAPS>
+will be considered a name that Perl can use for some automatic or
+special behavior. With grammars, a regex named C<TOP> is considered the
+entry point into the grammar. It is the default rule when you try to
+match a string against the grammar.  More on that later.
+
+=end sidebar
+
 Another benefit, besides self documentation is that when a pattern match
 succeeds, you may ask about portions of the match in a meaningful way.
 Once you've matched the C<person's-name>, how do you know their last
@@ -99,7 +111,7 @@ ways?  With a named regex, the C<Match> object can be treated like a hash
 with the name of the regex as the key and the portion of the string that
 was matched by that named regex as the value.
 
-=head2 Grouping named Regex
+=head2 Grouping named regex
 
 At last we come to it. Grammars. Naming regex is fine, but just as
 subroutines can be grouped into logically cohesive groups (modules), so
@@ -124,29 +136,65 @@ grammar. When they are mentioned within other named regex, Perl will
 look within the grammar for a regex with the appropriate nameN<This
 isn't the whole truth, but that's why this is just an introduction and
 not a reference>.  This is B<very> similar to the way objects work.
-Gramars are analogous to classes and the named regex within are analogous
+Grammars are analogous to classes and the named regex within are analogous
 to methods.
-
-=begin sidebar
-
-Even though you are free to name your regex however you like, some names
-Perl will utilize for its own purposes.  Typically anything in
-B<ALLCAPS> will be considered a name that Perl can use for some automatic
-or special behavior.  With grammars, a regex named C<TOP> is considered
-the entry point into the grammar.  It is the default rule when you try to "match"
-a string against the grammar.
-
-=end sidebar
 
 =head2 Calling named regex
 
 So, how do you "mention" a named regex?  Just as in the earlier examples, if
 you enclose the name in angle brackets (C<< < >> and C<< > >>), Perl will
-try to match that named regex at that point in the regex.  
+try to match that named regex at that point in the regex.  It's almost as
+if you substituted the name with the actual regex.
 
+As a side-effect of using a named regex, the portion of the string that
+matches will be saved as part of the C<Match> object and the C<Match>
+object will obtain a hash-like interface where the keys are the names of
+the regex and the values are the portion of the string that matched.
+
+If you don't want this capturing behaviour, but still want the benefit of
+named regex, you can call the regex with a leading dot C<.>, like so:
+
+    # TODO fix this
+    regex foo {
+        <.bar>
+    }
+
+[TODO more prose here]
+
+Here's a more complete example that shows the capturing behavior:
+
+    # TODO add an example
+
+=head2 Using Grammars
+
+Okay ... so far we've danced around the declarational details for
+grammars, but then what?  What's the syntax for matching a string against
+a grammar?  Each grammar automatically gets a method called C<.parse()> that
+allows you to do just that:
+
+    my $match = YourGrammar.parse($some-string);
+
+Afterwards, C<$match> will contain the C<Match> object that will allow you
+to access the parts of the string that were captured via a capturing group
+(parentheses) or a named regex.
+
+By default, calling C<.parse()> as above will try to match the string
+against a regex named C<TOP> within the grammar.  If the grammar has no
+regex named C<TOP>, then an error is generated.  C<TOP> is considered the
+entry point to the grammar.  But, you aren't stuck with that name.  If you
+want to use a different named regex as the starting point for parsing a
+string with a grammar, you can specify it in the call to C<.parse()>:
+
+    my $match = YourGrammar.parse($some-string, :rule<fred>);
+
+This invocation will use the regex named C<fred> within C<YourGrammar> to
+start parsing a string when the C<.parse()> method is called.
 
 
 =head2 Named regex parameters
+
+Since regex are just like subroutines, it makes sense that you can also
+pass parameters to them.
 
 
 
@@ -162,7 +210,21 @@ C<Grammar> class which has the default definitions for the built-in
 named regex.
 
 More over you can also compose grammars just like you'd compose classes by
-using roles.
+using roles.  If you find yourself using a particular subset of a grammar
+over and over again, you could factor it out into a role and then compose
+that role into your grammar just like you would compose a role into a
+class:
+
+=begin example
+
+    role DecimalNumber { ... }
+
+    # all of these languages have decimal numbers
+    grammar C does DecimalNumber { ... }
+    grammar Perl does DecimalNumber { ... }
+    grammar Haskell does DecimalNumber { ... }
+
+=end example
 
 
 =head2 Don't just parse there!  I<Do> something!
@@ -197,13 +259,14 @@ this phenomenon, consider the following bit of code:
 
 As the regex engine tries to match the "ab" sequence, it will match the
 first "a" in the string, then execute the code (and say "hi"), then
-attempt to match a "b".  Since there is no "b" immediately after the first
-"a" in the string, the regex engine skips ahead one character and tries
-again.  Again, it matches an "a", says "hi", fails to match a "b" and then
-backtracks.  On the third attempt, the same sequence of events happens
-except this time it runs out of string attempting to match the "b" and so
-the process ends with a failed pattern match.  However, whether the match
-succeeds (if it had ended in a "b") or fails, it still outputs "hi" 3 times.
+attempt to match a "b". Since there is no "b" immediately after the
+first "a" in the string, the regex engine skips ahead one character in
+the string and backtracks to try to match the "a" again. Again, it
+matches an "a", says "hi", fails to match a "b" and then backtracks. On
+the third attempt, the same sequence of events happens except this time
+it runs out of string attempting to match the "b" and so the process
+ends with a failed pattern match. However, whether the match succeeds
+(if it had ended in a "b") or fails, it still outputs "hi" 3 times.
 
 As should be evident from the example above, the ability to execute code
 in this manner really has nothing to do with grammars, but is a feature of
@@ -234,43 +297,48 @@ to it at the point in the parse were you want the code to execute.
 
 Remember before when we mentioned that a grammar is just a funny kind of
 class? The ability to define methods on the grammar is just another
-manifestation of that.  
+manifestation of that.
 
+    # TODO better explanations
 
+Another way to execute code during a parse is to specify an I<action
+class>. An action class is a normal class just as you would use in any
+other object oriented code except that its method names are the same as
+the named regex within a grammar and these methods are automatically
+invoked at the end of a successful p
 
-=begin notes
+The full syntax of a call to C<.parse()> is thus:
 
-    make
+    my $match = Grammar.parse($string, :rule<start>, :action<>);
 
-=end notes
+    # TODO give a complete example with actions and all
 
-=head2 Building a Grammar
+    # TODO explain make
 
+=begin sidebar
 
-
-=head2 Using Grammars
-
-    my $match = Grammar.parse($text, :action<A>, :rule<TOP>)
-
-=head2 Debugging
+=head3 Debugging
 
 There's a special named regex available in Rakudo to aid in debugging your
 grammars when you think they should match and they do not.  Adding
-C« <?DEBUG> » anywhere within a grammar will cause the parsing information
+C<< <?DEBUG> >> anywhere within a grammar will cause the parsing information
 to be output to standard error from that point on as the parse happens.
 
+=end sidebar
 
-=head2 References
+=head2 Wrap-up
 
-For more information on Perl 6 grammars, see the official Perl 6
-documentation at L<http://perlcabal.org/syn/S05.html>. There are also
-some historical documents at
-L<http://dev.perl.org/perl6/doc/design/apo/A05.html> and
+Hopefully I've covered enough of grammars for you to start playing with
+them and using them in your own code. For more information on Perl 6
+grammars, see the official Perl 6 documentation at
+L<http://perlcabal.org/syn/S05.html>. There are also some historical
+documents at L<http://dev.perl.org/perl6/doc/design/apo/A05.html> and
 L<http://dev.perl.org/perl6/doc/design/exe/E05.html> that may give you a
 feel for things. If you're really interested in learning more but feel
-you need to interact with people try the mailing list at
-perl6-language@perl.org or log on to a freenode IRC server and drop
+you need to interact with people try the mailing list at 
+perl6-language@perl.org or log on to a freenode IRC server and drop 
 by #perl6.
+
 
 =head2 About the Author
 
