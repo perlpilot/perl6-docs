@@ -154,16 +154,17 @@ the regex and the values are the portion of the string that matched.
 If you don't want this capturing behaviour, but still want the benefit of
 named regex, you can call the regex with a leading dot C<.>, like so:
 
-    # TODO fix this
-    regex foo {
-        <.bar>
-    }
+    regex foo { <.bar> }
 
-[TODO more prose here]
+Why would you want to turn off the capturing behavior?  For one thing, the
+grammar engine has more bookkeeping to do in order for portions of the
+string to be captured.  So, there's a bit of an efficiency gain to I<not>
+capture.  Also, there are times when a named regex really isn't a regex at
+all, but rather just a means to execute some arbitrary Perl code.
+Capturing the result of that execution may not be desirable or meaningful.
 
-Here's a more complete example that shows the capturing behavior:
-
-    # TODO add an example
+Later we'll see more complete examples that utilize all of the things
+we've talked about so far.
 
 =head2 Using Grammars
 
@@ -188,17 +189,7 @@ string with a grammar, you can specify it in the call to C<.parse()>:
     my $match = YourGrammar.parse($some-string, :rule<fred>);
 
 This invocation will use the regex named C<fred> within C<YourGrammar> to
-start parsing a string when the C<.parse()> method is called.
-
-
-=head2 Named regex parameters
-
-Since regex are just like subroutines, it makes sense that you can also
-pass parameters to them.
-
-
-
-=head2 proto
+parse C<$some-string>.
 
 =head2 Classy behavior
 
@@ -226,7 +217,6 @@ class:
 
 =end example
 
-
 =head2 Don't just parse there!  I<Do> something!
 
 Just being able to parse a string and being able to understand its
@@ -253,7 +243,7 @@ code block matches, then the code block is immediately executed.  Be
 careful though, if, in the process of matching a string, your regex
 happens to backtrack across the code block, it will be executed as
 the parse moves forward across it again and again.  As a simple example of
-this phenomenon, consider the following bit of code:
+this phenomenon, consider the following pattern match:
 
     "aaa" ~~ / a { say "hi" } b /
 
@@ -272,9 +262,9 @@ As should be evident from the example above, the ability to execute code
 in this manner really has nothing to do with grammars, but is a feature of
 regex in general.
 
-Another mechanism to execute arbitrary code while parsing the grammar is
-to create a method within the grammar and then include a zero-width call
-to it at the point in the parse were you want the code to execute.
+Another mechanism to execute arbitrary code while parsing the grammar
+is to create a method within the grammar and then include a call to it
+at the point in the parse were you want the code to execute.
 
     grammar foo {
         regex foo { <.setup> blah blah }
@@ -283,48 +273,24 @@ to it at the point in the parse were you want the code to execute.
         }
     }
 
-    grammar C-enum {
-        rule enum {
-            "enum" <ident> "{" ~ "}" enum_list 
-        }
-        rule enum_list {
-            enum_value ** ","
-        }
-        rule enum_value { 
-            <ident> "=" <constant>
-        }
-    }
-
 Remember before when we mentioned that a grammar is just a funny kind of
 class? The ability to define methods on the grammar is just another
 manifestation of that.
 
-    # TODO better explanations
-
-Another way to execute code during a parse is to specify an I<action
-class>. An action class is a normal class just as you would use in any
-other object oriented code except that its method names are the same as
-the named regex within a grammar and these methods are automatically
-invoked at the end of a successful p
+Yet another way to execute code during parsing is to specify an
+I<actions object> to the C<.parse()> method. After a named regex is
+completely parsed, a method of the same name in the actions object is
+executed with the current match object as its parameter.
 
 The full syntax of a call to C<.parse()> is thus:
 
-    my $match = Grammar.parse($string, :rule<start>, :action<>);
+    my $match = Grammar.parse($string, :rule($start-regex), :actions($actions-object) );
 
-    # TODO give a complete example with actions and all
+=for todo
 
-    # TODO explain make
+Add more useful stuff
 
-=begin sidebar
-
-=head3 Debugging
-
-There's a special named regex available in Rakudo to aid in debugging your
-grammars when you think they should match and they do not.  Adding
-C<< <?DEBUG> >> anywhere within a grammar will cause the parsing information
-to be output to standard error from that point on as the parse happens.
-
-=end sidebar
+=end todo
 
 =head2 Wrap-up
 
