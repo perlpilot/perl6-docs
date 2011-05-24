@@ -655,7 +655,7 @@ useful that Perl provides a nice short-cut for it.
 
 Earlier we talked about "zero-width assertions" that allow us to match
 "in between" characters. But we've also talked about other kinds of
-assertions, only we didn't call them that. Whever you write a regex to
+assertions, only we didn't call them that. Whenever you write a regex to
 match I<anything>, you're asserting something about what a successful
 match should look like. So, for instance, in the following regex,
 
