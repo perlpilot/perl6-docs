@@ -691,7 +691,7 @@ and it is identical to
     / \w+ /
 
 with an important and useful exception: the portion of the string that
-matches can also be accessed as C< $/<identifier> >.
+matches can also be accessed as C<< $/<identifier> >>.
 
 Perl 6 predeclares several useful named regex (See L<S05> for a complete list):
 
