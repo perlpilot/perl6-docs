@@ -185,4 +185,4 @@ rule { }    same as token but with :sigspace also on.
 
 =head2 Author
 
-Copyright 2009 Jonathan Scott Duff  <duff@pobox.com>
+Copyright 2009-2014 Jonathan Scott Duff  <duff@pobox.com>
