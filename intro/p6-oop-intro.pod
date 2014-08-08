@@ -63,20 +63,43 @@ class Thingy {
 
 =end
 
-The C<has> declarator just sets aside a slot of the appropriate shape so
-that when objects of this class are created, storage for the actual data
-can be generated and used by the object.  For the most part these data
-slots are described just as you would describe any other variable within a
-Perl program.  They can be scalars, arrays, hashes, etc.  The big
-difference though is that, in addition to the main sigil that describes
-the interface for the variable, it has a I<twigil> or a secondary sigil
-that describes the variable access.  In the above class definition, the
-C<Thingy> class has a single scalar slot as indicated by the C<$> in
-C<has $!stuff>, and that scalar is "private" to this class.  That's what
-the C<!> twigil means.  This variable can only be accessed from within the
-class definition or from methods that belong directly to this class.  It can't
-even be accessed by inherited classes.  But more on that later.
+The C<has> declarator sets aside a slot of the appropriate shape so that
+when objects of this class are created, storage for the actual data can
+be generated and used by the object. For the most part these data slots
+are described just as you would describe any other variable within a
+Perl program. They can be scalars, arrays, hashes, etc.N<The C<has>
+declarator is used rather than C<my> because the lifetime of this
+variables is different than ordinary variables. They only come into
+existence when a new object of the class is created and disappear when
+that object is destroyed.> An important difference though is that, in
+addition to the main sigil that describes the interface for the
+variable, it has a I<twigil> or a secondary sigil that describes the
+variable access. In the above class definition, the C<Thingy> class has
+a single scalar slot as indicated by the C<$> sigil, and the C<!> twigil
+indicates that this scalar is "private" to this class. This variable can
+only be accessed from within the class definition or from I<methods> that
+belong directly to this class. It can't even be accessed by inherited
+classes; but more on that later.
 
+Subroutines that act upon the object are called I<methods> and are declared
+within the class definition like so:
+
+=for example
+
+class Thingy {
+    method do_something { say "hi" }
+}
+
+=end
+
+For the most part methods look like ordinary subroutines; they can have
+a signature specifying the name and type of parameters passed to the
+method; they can contain arbitrary code; they can return values; et
+cetera. However, methods will also have a special symbol available to
+them called C<self> that is the object that the method is operating
+upon. Also, methods can B<only> be called through an object in some way.
+In the above example, we can't just call the method as C<do_something;>,
+we need to call it on an object--C<$thingy-object.do_something>
 
 Another I<twigil> that is commonly used is the C<.>:
 
