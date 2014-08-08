@@ -51,8 +51,9 @@ name that Perl 6 now knows about, so that when it sees C<Thingy> in the
 future, it will know to reference this class definition.
 
 To give objects of a class some data to act upon, we have to declare some
-data slots within the class definition.  Perl 6 lets you do this with the
-C<has> declarator within a class definition:
+data slots within the class definition.  These data slots are called
+I<attributes>.  Perl 6 lets you create attributes within the class
+definition with the C<has> declarator:
 
 =for example
 
@@ -73,13 +74,22 @@ that describes the variable access.  In the above class definition, the
 C<Thingy> class has a single scalar slot as indicated by the C<$> in
 C<has $!stuff>, and that scalar is "private" to this class.  That's what
 the C<!> twigil means.  This variable can only be accessed from within the
-class definition or from methods that belong to this class.
+class definition or from methods that belong directly to this class.  It can't
+even be accessed by inherited classes.  But more on that later.
 
 
-    methods
+Another I<twigil> that is commonly used is the C<.>:
 
-    . twigil
+=for example
 
+class Thingy {
+    has $.stuff;
+}
+
+=end
+
+Not only will this set aside space for the scalar within the object, but it 
+will also create an "accessor method" for the attribute.
 
 =head2 Creating objects (really this time)
 
