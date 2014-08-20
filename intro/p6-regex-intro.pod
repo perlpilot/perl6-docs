@@ -558,7 +558,7 @@ named capture of a specific portion of the string instead of (or even
 in addition to) storing the captured portion in $0, $1, $2, etc.
 For instance:
 
-    / $<foo>:=[ <[A-Z]+[0-9]>**4 ] / 
+    / $<foo>:=[ <[A..Z]+[0..9]>**4 ] / 
 
 if the group matches, the result is placed in C<< $/<$foo> >>.  As with
 numeric captures, there is a short-hand syntax for accessing a named
