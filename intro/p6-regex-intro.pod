@@ -144,8 +144,7 @@ characters). Because regular expressions tend towards high character
 density, they can often be difficult to read. In Perl 6 regex, you may
 use whitespace to separate parts of your regex to make it easier to
 read. The whitespace is ignored by the regex engine. To match literal
-space characters, just as with other metasyntax, you may precede the
-space with a backslash or enclose the space in quotes.
+space characters or other whitespace you should enclose it in quotes.
 
 In future examples I will occasionally show a given regex in its spaced
 form. The spaced form is preferable when writing regex as it makes them
