@@ -37,7 +37,7 @@ outside world, etc.  We do this in Perl 6 with the C<class> declarator.
 
 =for example
 
-class Thingy { }
+    class Thingy { }
 
 =end
 
@@ -57,9 +57,9 @@ definition with the C<has> declarator:
 
 =for example
 
-class Thingy {
-    has $!stuff;
-}
+    class Thingy {
+        has $!stuff;
+    }
 
 =end
 
@@ -86,9 +86,9 @@ within the class definition like so:
 
 =for example
 
-class Thingy {
-    method do_something { say "hi" }
-}
+    class Thingy {
+        method do_something { say "hi" }
+    }
 
 =end
 
@@ -105,9 +105,9 @@ Another I<twigil> that is commonly used is the C<.>:
 
 =for example
 
-class Thingy {
-    has $.stuff;
-}
+    class Thingy {
+        has $.stuff;
+    }
 
 =end
 
@@ -122,7 +122,7 @@ C<Thingy> object from the above class definition, you would do:
 
 =for example
 
-my $object = Thingy.new;
+    my $object = Thingy.new;
 
 =end
 
@@ -132,12 +132,12 @@ C<Thingy> objects will be present in C<$object>.  Whatever methods were
 defined for C<Thingy> objects will be available to C<$object>
 
 
-class Point {
-    has $!x;
-    has $.y;
-    has $.z is rw;
-    my $foo;
-}
+    class Point {
+        has $!x;
+        has $.y;
+        has $.z is rw;
+        my $foo;
+    }
 
 =head2 Roles
 
@@ -151,8 +151,8 @@ from some built-in objects that have these behaviors.
 
 =head2 Copyright and Author
 
-    Copyright 2011 
-    Jonathan Scott Duff 
-    duff@pobox.com
+Copyright 2011 
+Jonathan Scott Duff 
+duff@pobox.com
 
 =end
