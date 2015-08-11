@@ -1,0 +1,119 @@
+=begin pod
+=head1 Perl 6 -- IO::Notification
+
+So ... there I was, solving the world's problems, when suddenly ... I woke up.
+
+In reality I was trying to port a program from Perl 5 to Perl 6. At the
+heart of the Perl 5 program was a bit of code that watched a directory
+for new files and farmed each one out to an appropriate process for,
+well ... processing. :) In Perl 5, watching a directory was accomplished
+with L<File::ChangeNotify|https://metacpan.org/pod/File::ChangeNotify>.
+The analogous mechanism in Perl 6 is called
+L<IO::Notification|http://doc.perl6.org/type/IO::Notification> and it
+comes "built-in" as part of the normal Rakudo compiler. Here was my
+first experiment just to see how to use it:
+
+=begin code
+    my $inbox = IO::Notification.watch_path(".");
+    $inbox.tap(&say);
+    sleep;
+=end code
+
+The C<.watch_path> method returns a
+L<Supply|http://doc.perl6.org/type/Supply> that emits events for
+changes to the specified file or directory. For my test, I'm just
+watching the current directory. A C<Supply> is an asynchronous
+mechanism for, as the name implies, supplying data. Because it's
+asynchronous, the C<.watch_path> method returns the C<Supply>
+immediately, whether there were changes to the directory or not. In
+order to do something with the events emitted by the Supply, I used the
+C<.tap> method to specify a routine to execute on each event where the
+event is passed directly to the routine. In this case, I just call the
+built-in C<say> routine to output the events on the standard output
+stream. Finally, a bare C<sleep> means to sleep forever. This is so
+that the program won't just exit, but continue to process any events
+that might be emitted by the Supply.
+
+When I executed this program and created files in the current directory
+called F<foo>, F<bar>, and F<baz>, this was the output I received:
+
+=begin output
+foo: FileRenamed
+foo: FileChanged
+bar: FileRenamed
+bar: FileChanged
+baz: FileRenamed
+baz: FileChanged
+=end output
+
+For each file that was created I received two events (FileRenamed and
+FileChanged) and each event consists of two pieces of information: the
+name of the file that was changed and the type of event. It turns out
+that C<IO::Notification> only has these two event types. When I remove
+the file called F<foo>, this is what I see:
+
+=begin output
+foo: FileRenamed
+=end output
+
+And, when I update an already existing file:
+
+=begin output
+bar: FileChanged
+=end output
+
+So, it looks like creating a file is the same thing as renaming and
+changing it. I guess going from "no name" to having a name (or vice
+versa when removing a file) counts as "renaming" and going from "doesn't
+exist" to "does exist" counts as "changing" the file.
+
+For my purposes, I found this a little annoying. What I really wanted
+was 3 types of events:
+=item FileCreated - a new file has appeared in a directory
+=item FileChanged - an existing file has been updated
+=item FileRemoved - an existing file has been removed
+
+Fortunately, Perl 6 is well designed such that I can relatively easily create what I want.
+
+A plan of attack might be to create a class that inherits from
+C<IO::Notification> and redefines the C<.watch-path> method in terms of
+the existing method in <IO::Notification>. Let's try that:
+
+=begin code
+#!/usr/bin/env perl6
+
+enum MyFileChangeEvent < FileCreated FileChanged FileRemoved >;
+
+class MyIONotification is IO::Notification {
+    method watch-path(Str $path) {
+        my $s := callsame;
+        $s.map(-> $e {
+            my $event = FileChanged;
+            if $e.event ~~ FileRenamed {
+                $event = do given $e.path.IO {
+                    when $_ ~~ :e { FileCreated }
+                    when $_ !~~ :e { FileRemoved }
+                }
+            }
+            $e.new(:path($e.path), :$event);
+        });
+    }
+}
+
+my $inbox = MyIONotification.watch-path(".");
+$inbox.tap(&say);
+sleep;
+=end code
+
+What's going on inside this new C<.watch-path> method? First, I bind the
+result of C<callsame> to a variable. C<callsame> will call a method of
+the same name further up in the inheritance hierarchy with the same
+arguments that were passed to this version. In this case, the next level
+up is C<IO::Notification> and it happens to have a method named C<.watch-
+path> as well. :-) Since C<IO::Notification>'s version of C<.watch-path>
+returns a C<Supply>, we can call the C<.map> method to create a new
+C<Supply> that transforms the values emitted.
+
+
+
+=end pod
