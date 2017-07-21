@@ -853,13 +853,13 @@ by #perl6.
 
 =head2 About the Author
 
-Jonathan Scott Duff is an Information Technology Research Manager at the
-Conrad Blucher Institute for Surveying and Science on the campus of
-Texas A&M University-Corpus Christi.  He has a beautiful wife and 4 lovely
-children. When not working or spending time with his family, Scott tries
-to keep up with Parrot and Perl 6 development. Sometimes he can be found
-on IRC as PerlJam in one of the perl-related channels. But if you really
-want to get in touch with him, the best way is via email: duff@pobox.com
+Jonathan Scott Duff is a senior software developer at Assurant, Inc.
+He has a beautiful wife and 4 lovely children. When not working or 
+spending time with his family, Scott tries to keep up with Perl 6 
+development and do a little wood working or spend time in nature.
+Sometimes he can be found on IRC as either perlpilot or PerlJam in
+one of the perl-related channels.  If you want to get in touch with 
+him, the best way is via email: duff@pobox.com
 
 
-Copyright 2007-2009 Jonathan Scott Duff
+Copyright 2017 Jonathan Scott Duff
