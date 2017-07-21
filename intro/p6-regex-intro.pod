@@ -503,7 +503,7 @@ line sequence within the string (i.e. "\n" terminates each line))
     / ^^ \w+ /          "the", "brown", "jumped", "the", and "dog"
     / \w+ $$ /          "quick", "fox", "over", "lazy", and "dog"
     / << o\w+ /         "over"
-    / o \w+ >> /        "own", "over", "og"
+    / o \w+ >> /        "own", "ox", "over", "og"
 
 In order for the patterns that would match multiple portions of the string 
 to actually match those substrings, there needs to be some way to tell the regex
