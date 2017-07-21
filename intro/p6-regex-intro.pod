@@ -1,4 +1,4 @@
-=head1 Introduction to Perl 6 Regex
+=head1 Introduction to Perl 6 Regex
 
 =head2 Context
 
@@ -25,12 +25,12 @@ Unfortunately, as the regular expressioning public put more demand on
 Perl's regular expression syntax, it accumulated some crufty items--
 little inconsistencies that were to maintain backward compatibility or
 were introduced because they were needed, but before they were fully
-thought out. In designing Perl 6, Larry Wall not only looked at the
+thought out. In designing Perl 6, Larry Wall not only looked at the
 syntax and semantics of Perl proper, but he also took a hard look at the
 sub-language that is regular expressions and refactored it into
 something that makes better sense.
 
-In this article I'm going to give an introduction to Perl 6 regex (we
+In this article I'm going to give an introduction to Perl 6 regex (we
 call them "regex" to maintain the historical association with regular
 expressions though they've strayed quite far from the mathematical
 sense of regular languages). I'll point out differences from
@@ -84,7 +84,7 @@ meaning. (For the purposes of metasyntax, the underscore is considered
 alphanumeric.)
 
 Currently not all metacharacters actually I<have> a special meaning but
-many do and in order to keep things simple, Perl 6 chooses to designate
+many do and in order to keep things simple, Perl 6 chooses to designate
 all non-alphanumeric characters as metasyntactic. However, there's an
 "escape mechanism" that lets you treat metacharacters as themselves
 (literally), and alphanumeric characters as metasyntactic. By prefixing
@@ -131,9 +131,9 @@ In these cases, the quotes are metasyntactic delimiters that mean
 =begin sidebar
 
 In Perl 5 (and most other regular expression variants), a dot matches
-any character except for the newline sequence. In Perl 6, this odd
+any character except for the newline sequence. In Perl 6, this odd
 restriction is lifted and the dot matches B<any> character, including
-the newline sequence. Perl 6 has other mechanisms to accomplish Perl
+the newline sequence. Perl 6 has other mechanisms to accomplish Perl
 5's behavior.  See L<"Character Classes"> below.
 
 =end sidebar
@@ -141,7 +141,7 @@ the newline sequence. Perl 6 has other mechanisms to accomplish Perl
 The most important metasyntactic characters in regex are whitespace
 (typically space characters, but sometimes tabs and other "invisible"
 characters). Because regular expressions tend towards high character
-density, they can often be difficult to read. In Perl 6 regex, you may
+density, they can often be difficult to read. In Perl 6 regex, you may
 use whitespace to separate parts of your regex to make it easier to
 read. The whitespace is ignored by the regex engine. To match literal
 space characters or other whitespace you should enclose it in quotes.
@@ -171,7 +171,7 @@ Examples:
 Note that in the above examples the quantifier is only applied to the
 preceding character. If you need to match a group of characters
 repeatedly, you have to use one of the several grouping mechanisms in
-Perl 6 regex (see L<Grouping> below).
+Perl 6 regex (see L<Grouping> below).
 
 There is another character sequence sometimes called the universal
 quantifier that allows you to prescribe a specific number of times a
@@ -438,7 +438,7 @@ that bothers you, imagine that they are instead complicated expressions
 rather than simple strings) As the match for "ball" repeatedly fails,
 the regex engine repeatedly backtracks and tries again.
 
-However, Perl 6 provides a way to tell the regex engine when to give
+However, Perl 6 provides a way to tell the regex engine when to give
 up. A colon in the regex causes Perl to not retry the preceding
 "atom".  In regex parlance, an atom is anything that is matched as a
 unit; a group is an atom, a single character may be an atom, etc.
@@ -460,7 +460,7 @@ cause the entire regex to fail once it is backtracked over, but only the
 atom to which it is applied. If not matching that atom means that the
 entire regex won't match, then, of course, the entire regex will fail.
 
-Perl 6 has other forms of backtracking control. A double colon will
+Perl 6 has other forms of backtracking control. A double colon will
 cause its enclosing group to fail if backtracked over. A triple colon
 will cause the entire regex to fail.   For more information on these
 see L<S05:Backtracking control>.
@@ -477,7 +477,7 @@ from an alphabetic character to a numeric character or only at the
 beginning of the string). This idea of matching without consuming is
 called a zero-width assertion.
 
-Perl 6 provides some metacharacters that denote handy zero-width
+Perl 6 provides some metacharacters that denote handy zero-width
 assertions.  
 
     ^       only matches at the beginning of the string
@@ -510,7 +510,7 @@ to actually match those substrings, there needs to be some way to tell the regex
 engine to continue matching from where the last match left off. See L<modifiers>
 below.
 
-=head2 Interacting with Perl 6
+=head2 Interacting with Perl 6
 
 =head3 match objects and capturing
 
@@ -595,7 +595,7 @@ C<ignorecase> is too much to type out.
         $foo ~~ m :ignorecase/ foo /;    # will match "foo", "FOO", "fOo", etc.
         $foo ~~ m :i/ foo /;             # same
 
-Perl 6 predefines several of these modifiers (for a complete list,
+Perl 6 predefines several of these modifiers (for a complete list,
 see L<S05>):
 
     modifier        short-hand      meaning
@@ -642,7 +642,7 @@ of whitespace between tokens or can't guarantee a certain number of
 spaces, you may be inclined to use C<\s*> or C<\s+> often in your regex.
 However, it can get tedious typing C<\s+> so often and it tends to
 visually detract from the parts you're really interested in matching.
-Thus Perl 6 regex provides the :sigspace modifier so that whitespace
+Thus Perl 6 regex provides the :sigspace modifier so that whitespace
 in your pattern matches whitespace in your string.  This is I<so>
 useful that Perl provides a nice short-cut for it.
 
@@ -675,7 +675,7 @@ write the above regex like so:
     / <function_name> '(' [ <parameter> ',' ]* <parameter>? ')' /
 
 you might have a better idea what those C<\w+> sequences were for.
-Lucky for us, Perl 6 provides just such a mechanism.
+Lucky for us, Perl 6 provides just such a mechanism.
 
 The syntax for declaring a named regex is:
 
@@ -692,7 +692,7 @@ and it is identical to
 with an important and useful exception: the portion of the string that
 matches can also be accessed as C<< $/<identifier> >>.
 
-Perl 6 predeclares several useful named regex (See L<S05> for a complete list):
+Perl 6 predeclares several useful named regex (See L<S05> for a complete list):
 
     <alpha>     a single alphabetic character
     <digit>     a single numeric character
@@ -724,7 +724,7 @@ of how much of the string has been consumed will point just after the
 can be processed by other means if necessary.
 
 By declaring named regex like this you can build up a whole library of
-regex that match some special purpose language. In fact, Perl 6 lets
+regex that match some special purpose language. In fact, Perl 6 lets
 you group your regex under a common name by declaring that all of your
 regex belong to the same "grammar".
 
@@ -759,13 +759,13 @@ fully qualified:
 
     "3+5*2" ~~ / <Calc.expr> /;
 
-Perl 6 also has some shortcuts for specifying common and useful defaults
+Perl 6 also has some shortcuts for specifying common and useful defaults
 to the regex engine. If, instead of using the C<regex> keyword, you use
-C<token>, Perl 6 will automatically turn on the C<:ratchet> modifier for
+C<token>, Perl 6 will automatically turn on the C<:ratchet> modifier for
 the duration of the regex. The idea being that once you've matched a
 "token" you're not likely to want to backtrack into it.
 
-Also, if you use C<rule> instead of C<regex>, Perl 6 will turn on both
+Also, if you use C<rule> instead of C<regex>, Perl 6 will turn on both
 of the C<:ratchet> and C<:sigspace> modifiers.
 
 Here's the C<Calc> grammar above, rewritten to use these syntactic
@@ -797,11 +797,11 @@ whitespace in the string, that string will parse successfully.
 =head2 Strings and Beyond
 
 Throughout this article I've been talking about regex as they apply to very
-ASCII-like strings, however Perl 6 regex are not restricted by ASCII.  Perl 6
+ASCII-like strings, however Perl 6 regex are not restricted by ASCII.  Perl 6
 regex can be applied to any string of Unicode characters and, in fact, are
 written in Unicode by default.
 
-Moreover, Perl 6 regex can be applied to things that are not strings but can be
+Moreover, Perl 6 regex can be applied to things that are not strings but can be
 made to look like strings.  For instance, they can be applied to a filehandle
 (which can represent itself as a stream of bytes/characters/whatever).  Even
 stranger, is that regex can be applied to an array of objects.  See
@@ -809,7 +809,7 @@ L<S05:Matching against non-strings>.
 
 =head2 Conclusion
 
-Well, that's about it for this introduction to Perl 6 regex. I've run
+Well, that's about it for this introduction to Perl 6 regex. I've run
 out of steam. There are tons of features that I've left out since this
 is just an introduction. A few that come to mind are:
 
@@ -841,7 +841,7 @@ explanation of the features mentioned in this article.
 
 =head2 References
 
-If you want to read more about Perl 6 regex, see the official Perl 6
+If you want to read more about Perl 6 regex, see the official Perl 6
 documentation at L<http://perlcabal.org/syn/S05.html>. There are also
 some historical documents at
 L<http://dev.perl.org/perl6/doc/design/apo/A05.html> and
