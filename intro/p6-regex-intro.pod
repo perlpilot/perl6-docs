@@ -48,15 +48,13 @@ would look like this:
 
     /abc/
 
-A regex is also sometimes called a "pattern" because we're looking for
-a portion of a string that looks like the strings that the regex
-describes. Regex are also sometimes called "rules" because they
-describe the conditions under which the string may match. But what
-string are we looking in? As in Perl 5, Perl 6 applies the regex to a
-variable called C<$_> if we haven't explicitly specified a variable to
-match against. For now I'm going to continue assuming that our string
-is in C<$_> in my examples. Later I'll show you how to specify a
-different string to match against.
+A regex is also sometimes called a "pattern" because we're looking for a
+portion of a string that looks like the strings that the regex
+describes. But what string are we looking in? As in Perl 5, Perl 6
+applies the regex to a variable called C<$_> if we haven't explicitly
+specified a variable to match against. For now I'm going to continue
+assuming that our string is in C<$_> in my examples. Later I'll show you
+how to specify a different string to match against.
 
 So, the above regex tries to find the pattern "abc" in the string C<$_>.
 If the pattern appears in the string, the regex returns a true value to
@@ -74,9 +72,9 @@ the regex:
 
 =head2 Meta-syntax
 
-Now, if all you can do is match literal strings, regexes wouldn't be so
-useful would they? Some characters rather than taken literally are so-
-called metacharacters that have special meaning in a regex. In Perl 6,
+Now, if all you can do is match literal strings, regexes wouldn't be very
+useful, would they? Some characters, rather than taken literally, are 
+so-called metacharacters that have special meaning in a regex. In Perl 6,
 any non-alphanumeric character is considered a metacharacter by
 default. That is, alphabetic and numeric characters match themselves and
 any other character may not match itself because it may have special
@@ -89,9 +87,9 @@ all non-alphanumeric characters as metasyntactic. However, there's an
 "escape mechanism" that lets you treat metacharacters as themselves
 (literally), and alphanumeric characters as metasyntactic. By prefixing
 an alphanumeric character with a backslash (B<\>) it becomes a
-metacharacter and is special. By the same token, prefixing a non-
-alphanumeric character with a backslash removes its metasyntactic nature
-and it becomes literal.
+metacharacter and has special meaning. By the same token, prefixing a 
+non-alphanumeric character with a backslash removes its metasyntactic 
+nature and it becomes literal.
 
 So, for example, a common metasyntactic character found in regular
 expressions is a period (C<.>, sometimes just called a "dot") and it
@@ -107,7 +105,7 @@ with a "d". All of the following strings match this pattern:
     those guys are turf idols           # matched "f id"
     shift down a gear                   # matched "ft d"
     
-If you want to actually match a period you can escape it like so:
+To match a literal period character you can escape it like so:
 
     /foo\./                             # matches "foo."
 
@@ -138,21 +136,17 @@ the newline sequence. Perl 6 has other mechanisms to accomplish Perl
 
 =end sidebar
 
-The most important metasyntactic characters in regex are whitespace
+Some very important metasyntactic characters in regex are whitespace
 (typically space characters, but sometimes tabs and other "invisible"
 characters). Because regular expressions tend towards high character
 density, they can often be difficult to read. In Perl 6 regex, you may
 use whitespace to separate parts of your regex to make it easier to
 read. The whitespace is ignored by the regex engine. To match literal
-space characters or other whitespace you should enclose it in quotes.
-
-In future examples I will occasionally show a given regex in its spaced
-form. The spaced form is preferable when writing regex as it makes them
-easier to read later, and will be used from now on.
+space characters or other whitespace you should enclose them in quotes.
 
 =head2 Quantifiers
 
-Three other important metacharacters are what are called quantifiers.
+Three other important metacharacters are known as quantifiers.
 These characters allow you to specify repetition; that a character or
 group of characters may be matched multiple times.
 
@@ -178,12 +172,13 @@ quantifier that allows you to prescribe a specific number of times a
 particular pattern may match. To use the universal quantifier, you use
 two C<*> characters followed by a number or a range like so:
 
-    / fo ** 3 /     # matches only "fooo"
-    / fo ** 3..5 /  # matches one of "fooo", "foooo", or "fooooo"
+    / f o**3 /     # matches only "fooo"
+    / f o**3..5 /  # matches one of "fooo", "foooo", or "fooooo"
 
 You may also specify a closure after the C<**>, but that is beyond the
-scope of this introduction to explain.  See the references given at
-the end of this article for more reading.
+scope of this introduction to explain.  For more information on quantifiers
+see L<the Quantifiers section|https://docs.perl6.org/language/regexes#Quantifiers>
+of L<the Perl 6 documentation|https://docs.perl6.org/>.
 
 =begin sidebar
 
