@@ -857,4 +857,4 @@ one of the perl-related channels.  If you want to get in touch with
 him, the best way is via email: duff@pobox.com
 
 
-Copyright 2017 Jonathan Scott Duff
+Copyright 2007-2018 Jonathan Scott Duff
