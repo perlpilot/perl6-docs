@@ -278,7 +278,7 @@ and "subtract" character classes much like you would sets:
 
     /<[a..z] - [aeiou]>/    # Only match a consonant
     /<[asdfg] + [hjkl;]> +/ # Only match a sequence of characters that can
-                            # be made from home row keys.
+                            # be made from home row keys of many qwerty layouts
 
 
 =head2 Grouping
